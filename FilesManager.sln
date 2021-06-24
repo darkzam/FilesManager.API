@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30907.101
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FilesManager.API", "FilesManager.API\FilesManager.API.csproj", "{7217F3DC-0D30-47B3-913A-0BBA57DCDB76}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FilesManager.API", "FilesManager.API\FilesManager.API.csproj", "{7217F3DC-0D30-47B3-913A-0BBA57DCDB76}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FilesManager.DA", "FilesManager.DA\FilesManager.DA.csproj", "{70B9A43D-68F4-4AF2-B9A5-E641BC5D4216}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{7217F3DC-0D30-47B3-913A-0BBA57DCDB76}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7217F3DC-0D30-47B3-913A-0BBA57DCDB76}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7217F3DC-0D30-47B3-913A-0BBA57DCDB76}.Release|Any CPU.Build.0 = Release|Any CPU
+		{70B9A43D-68F4-4AF2-B9A5-E641BC5D4216}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{70B9A43D-68F4-4AF2-B9A5-E641BC5D4216}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{70B9A43D-68F4-4AF2-B9A5-E641BC5D4216}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{70B9A43D-68F4-4AF2-B9A5-E641BC5D4216}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
