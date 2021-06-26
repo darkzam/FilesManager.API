@@ -16,6 +16,7 @@ namespace FilesManager.DA
         {
             _filesManagerContext = filesManagerContext ?? throw new ArgumentNullException(nameof(filesManagerContext));
         }
+
         public async Task<IEnumerable<FileMetadata>> GetAll()
         {
             return await _filesManagerContext.FileMetadata.ToListAsync();
@@ -23,42 +24,54 @@ namespace FilesManager.DA
 
         public Task<FileMetadata> Create(FileMetadata fileMetadata)
         {
-            throw new NotImplementedException();
+            var result = _filesManagerContext.FileMetadata.Add(fileMetadata);
+
+            return Task.FromResult(result.Entity);
         }
 
-        public Task<IEnumerable<FileMetadata>> CreateCollection(IEnumerable<FileMetadata> filesMetadata)
+        public Task CreateCollection(IEnumerable<FileMetadata> filesMetadata)
         {
-            throw new NotImplementedException();
+            _filesManagerContext.FileMetadata.AddRange(filesMetadata);
+
+            return Task.CompletedTask;
         }
 
-        public Task<FileMetadata> Find(Guid id)
+        public async Task<FileMetadata> Find(Guid id)
         {
-            throw new NotImplementedException();
+            return await _filesManagerContext.FileMetadata.FindAsync(id);
         }
 
-        public Task<IEnumerable<FileMetadata>> FindCollection(Guid id)
+        public async Task<IEnumerable<FileMetadata>> FindCollection(IEnumerable<Guid> ids)
         {
-            throw new NotImplementedException();
+            return await _filesManagerContext.FileMetadata.Where(fileMetadata => ids.Contains(fileMetadata.Id)).ToListAsync();
         }
 
-        public Task<FileMetadata> Update(FileMetadata fileMetadata)
+        public Task Update(FileMetadata fileMetadata)
         {
-            throw new NotImplementedException();
+            _filesManagerContext.FileMetadata.Update(fileMetadata);
+
+            return Task.CompletedTask;
         }
 
-        public Task<IEnumerable<FileMetadata>> UpdateCollection(IEnumerable<FileMetadata> filesMetadata)
+        public Task UpdateCollection(IEnumerable<FileMetadata> filesMetadata)
         {
-            throw new NotImplementedException();
+            _filesManagerContext.FileMetadata.UpdateRange(filesMetadata);
+
+            return Task.CompletedTask;
         }
 
-        public Task<bool> Remove(Guid id)
+        public Task Remove(FileMetadata fileMetadata)
         {
-            throw new NotImplementedException();
+            _filesManagerContext.FileMetadata.Remove(fileMetadata);
+
+            return Task.CompletedTask;
         }
 
-        public Task<bool> RemoveCollection(IEnumerable<Guid> ids)
+        public Task RemoveCollection(IEnumerable<FileMetadata> filesMetadata)
         {
-            throw new NotImplementedException();
+            _filesManagerContext.FileMetadata.RemoveRange(filesMetadata);
+
+            return Task.CompletedTask;
         }
     }
 }

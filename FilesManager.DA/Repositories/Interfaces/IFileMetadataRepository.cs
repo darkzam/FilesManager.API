@@ -9,12 +9,12 @@ namespace FilesManager.DA.Repositories.Interfaces
     {
         Task<IEnumerable<FileMetadata>> GetAll();
         Task<FileMetadata> Find(Guid id);
-        Task<IEnumerable<FileMetadata>> FindCollection(Guid id);
+        Task<IEnumerable<FileMetadata>> FindCollection(IEnumerable<Guid> ids);
         Task<FileMetadata> Create(FileMetadata fileMetadata);
-        Task<IEnumerable<FileMetadata>> CreateCollection(IEnumerable<FileMetadata> filesMetadata);
-        Task<FileMetadata> Update(FileMetadata fileMetadata);
-        Task<IEnumerable<FileMetadata>> UpdateCollection(IEnumerable<FileMetadata> filesMetadata);
-        Task<bool> Remove(Guid id);
-        Task<bool> RemoveCollection(IEnumerable<Guid> ids);
+        Task CreateCollection(IEnumerable<FileMetadata> filesMetadata);
+        Task Update(FileMetadata fileMetadata);
+        Task UpdateCollection(IEnumerable<FileMetadata> filesMetadata);
+        Task Remove(FileMetadata fileMetadata);
+        Task RemoveCollection(IEnumerable<FileMetadata> filesMetadata);
     }
 }

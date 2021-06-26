@@ -59,14 +59,18 @@ namespace FilesManager.API.Core.Services
             return result;
         }
 
-        public Task<FileMetadata> Update(FileMetadata fileMetadata)
+        public async Task<FileMetadata> Update(FileMetadata fileMetadata)
         {
-            throw new NotImplementedException();
+            var result = await _unitOfWork.FileMetadataRepository.Update(fileMetadata);
+
+            return result;
         }
 
-        public Task<IEnumerable<FileMetadata>> UpdateCollection(IEnumerable<FileMetadata> filesMetadata)
+        public async Task<IEnumerable<FileMetadata>> UpdateCollection(IEnumerable<FileMetadata> filesMetadata)
         {
-            throw new NotImplementedException();
+            var result = await _unitOfWork.FileMetadataRepository.UpdateCollection(filesMetadata);
+
+            return result;
         }
     }
 }
