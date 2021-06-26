@@ -17,23 +17,38 @@ namespace FilesManager.DA
             _filesManagerContext = filesManagerContext ?? throw new ArgumentNullException(nameof(filesManagerContext));
         }
 
+        //Fetching the data from the DB and deserializing in a list
+        //is an expensive operation O(n)
+        //that's why we are gonna make it asynchronous by returning a task
+        //now this implementation is already wrapped inside the method
+        //ToListAsync. We must then add async to be able to await
+        //for the result of this operation and finally return the files list
         public async Task<IEnumerable<FileMetadata>> GetAll()
         {
             return await _filesManagerContext.FileMetadata.ToListAsync();
         }
 
-        public Task<FileMetadata> Create(FileMetadata fileMetadata)
+        //We would like to create an async method whenever 
+        //we are executing long running instructions
+        //Calling Add(Entity) is not a costly operation
+        //it's less than 3 instructions O(1)
+        //so it would be a good idea to make it synchronous
+        //and return a Value and not a Task<T>
+        public FileMetadata Create(FileMetadata fileMetadata)
         {
             var result = _filesManagerContext.FileMetadata.Add(fileMetadata);
 
-            return Task.FromResult(result.Entity);
+            return result.Entity;
         }
 
-        public Task CreateCollection(IEnumerable<FileMetadata> filesMetadata)
+
+        //AddRange might be an expensive operation in the worst case O(n)
+        //As our parameter list won't be bigger than 10 elements
+        //it's complexity will be O(10) in worst case which is pretty fast
+        //that's why we'll make this method synchronous
+        public void CreateCollection(IEnumerable<FileMetadata> filesMetadata)
         {
             _filesManagerContext.FileMetadata.AddRange(filesMetadata);
-
-            return Task.CompletedTask;
         }
 
         public async Task<FileMetadata> Find(Guid id)
@@ -46,32 +61,38 @@ namespace FilesManager.DA
             return await _filesManagerContext.FileMetadata.Where(fileMetadata => ids.Contains(fileMetadata.Id)).ToListAsync();
         }
 
-        public Task Update(FileMetadata fileMetadata)
+        //It just marks entities with EntityState.Modified state
+        //and sets the rest of the property
+        //all of it is O(1)
+        public void Update(FileMetadata fileMetadata)
         {
             _filesManagerContext.FileMetadata.Update(fileMetadata);
-
-            return Task.CompletedTask;
         }
 
-        public Task UpdateCollection(IEnumerable<FileMetadata> filesMetadata)
+        //UpdateRange then is O(n) but as n <= 10 
+        // O(10) is not an expensive operation
+        // we might need to test if actually O(10) might slow down
+        //the whole operation
+        public void UpdateCollection(IEnumerable<FileMetadata> filesMetadata)
         {
             _filesManagerContext.FileMetadata.UpdateRange(filesMetadata);
-
-            return Task.CompletedTask;
         }
 
-        public Task Remove(FileMetadata fileMetadata)
+        //Set EntityState.Deleted
+        //inexpensive O(1)
+        //then wrap it in a synchronous method
+        public void Remove(FileMetadata fileMetadata)
         {
             _filesManagerContext.FileMetadata.Remove(fileMetadata);
-
-            return Task.CompletedTask;
         }
 
-        public Task RemoveCollection(IEnumerable<FileMetadata> filesMetadata)
+        //it's O(n) for n <= 10
+        //it's still pretty inexpensive as we have 10 as upper boundary
+        //In the future I would like to test 
+        //for a bigger N value and see if RemoveRange doesn't perform well
+        public void RemoveCollection(IEnumerable<FileMetadata> filesMetadata)
         {
             _filesManagerContext.FileMetadata.RemoveRange(filesMetadata);
-
-            return Task.CompletedTask;
         }
     }
 }

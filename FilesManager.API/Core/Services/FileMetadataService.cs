@@ -3,6 +3,7 @@ using FilesManager.DA.Models;
 using FilesManager.DA.Repositories.Interfaces;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace FilesManager.API.Core.Services
@@ -17,18 +18,23 @@ namespace FilesManager.API.Core.Services
 
         public async Task<FileMetadata> Create(FileMetadata fileMetadata)
         {
-            var result = await _unitOfWork.FileMetadataRepository.Create(fileMetadata);
+            var result = _unitOfWork.FileMetadataRepository.Create(fileMetadata);
+
+            await _unitOfWork.CompleteAsync();
 
             return result;
         }
 
         public async Task<IEnumerable<FileMetadata>> CreateCollection(IEnumerable<FileMetadata> filesMetadata)
         {
-            var result = await _unitOfWork.FileMetadataRepository.CreateCollection(filesMetadata);
+            _unitOfWork.FileMetadataRepository.CreateCollection(filesMetadata);
 
             await _unitOfWork.CompleteAsync();
 
-            return result;
+            //loads the Inserted new entries with their respective Id
+            var newEntries = await _unitOfWork.FileMetadataRepository.FindCollection(filesMetadata.Select(x => x.Id));
+
+            return newEntries;
         }
 
         public async Task<FileMetadata> Get(Guid id)
@@ -47,30 +53,46 @@ namespace FilesManager.API.Core.Services
 
         public async Task<bool> Remove(Guid id)
         {
-            var result = await _unitOfWork.FileMetadataRepository.Remove(id);
+            var entity = await _unitOfWork.FileMetadataRepository.Find(id);
 
-            return result;
+            _unitOfWork.FileMetadataRepository.Remove(entity);
+
+            var count = await _unitOfWork.CompleteAsync();
+
+            return count == 1;
         }
 
         public async Task<bool> RemoveCollection(IEnumerable<Guid> ids)
         {
-            var result = await _unitOfWork.FileMetadataRepository.RemoveCollection(ids);
+            var entities = await _unitOfWork.FileMetadataRepository.FindCollection(ids);
 
-            return result;
+            _unitOfWork.FileMetadataRepository.RemoveCollection(entities);
+
+            var count = await _unitOfWork.CompleteAsync();
+
+            return count == ids.Count();
         }
 
         public async Task<FileMetadata> Update(FileMetadata fileMetadata)
         {
-            var result = await _unitOfWork.FileMetadataRepository.Update(fileMetadata);
+            _unitOfWork.FileMetadataRepository.Update(fileMetadata);
 
-            return result;
+            await _unitOfWork.CompleteAsync();
+
+            var updatedEntry = await _unitOfWork.FileMetadataRepository.Find(fileMetadata.Id);
+
+            return updatedEntry;
         }
 
         public async Task<IEnumerable<FileMetadata>> UpdateCollection(IEnumerable<FileMetadata> filesMetadata)
         {
-            var result = await _unitOfWork.FileMetadataRepository.UpdateCollection(filesMetadata);
+            _unitOfWork.FileMetadataRepository.UpdateCollection(filesMetadata);
 
-            return result;
+            await _unitOfWork.CompleteAsync();
+
+            var updatedEntries = await _unitOfWork.FileMetadataRepository.FindCollection(filesMetadata.Select(x => x.Id));
+
+            return updatedEntries;
         }
     }
 }

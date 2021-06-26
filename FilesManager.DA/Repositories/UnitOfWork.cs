@@ -15,9 +15,9 @@ namespace FilesManager.DA.Repositories
 
         public IFileMetadataRepository FileMetadataRepository => new FileMetadataRepository(_filesManagerContext);
 
-        public async Task CompleteAsync()
+        public async Task<int> CompleteAsync()
         {
-            await _filesManagerContext.SaveChangesAsync();
+           return await _filesManagerContext.SaveChangesAsync();
         }
     }
 }

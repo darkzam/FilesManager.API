@@ -8,6 +8,6 @@ namespace FilesManager.DA.Repositories.Interfaces
     public interface IUnitOfWork
     {
         IFileMetadataRepository FileMetadataRepository { get; }
-        Task CompleteAsync();
+        Task<int> CompleteAsync();
     }
 }
