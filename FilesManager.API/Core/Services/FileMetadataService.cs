@@ -51,26 +51,22 @@ namespace FilesManager.API.Core.Services
             return result;
         }
 
-        public async Task<bool> Remove(Guid id)
+        public async Task Remove(Guid id)
         {
             var entity = await _unitOfWork.FileMetadataRepository.Find(id);
 
             _unitOfWork.FileMetadataRepository.Remove(entity);
 
-            var count = await _unitOfWork.CompleteAsync();
-
-            return count == 1;
+            await _unitOfWork.CompleteAsync();
         }
 
-        public async Task<bool> RemoveCollection(IEnumerable<Guid> ids)
+        public async Task RemoveCollection(IEnumerable<Guid> ids)
         {
             var entities = await _unitOfWork.FileMetadataRepository.FindCollection(ids);
 
             _unitOfWork.FileMetadataRepository.RemoveCollection(entities);
 
-            var count = await _unitOfWork.CompleteAsync();
-
-            return count == ids.Count();
+            await _unitOfWork.CompleteAsync();
         }
 
         public async Task<FileMetadata> Update(FileMetadata fileMetadata)

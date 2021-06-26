@@ -18,7 +18,6 @@ namespace FilesManager.API.Controllers
         }
 
         [HttpGet]
-        [Route("")]
         public async Task<ActionResult<IEnumerable<FileMetadata>>> GetAll()
         {
             var result = await _fileMetadataService.GetAll();
@@ -26,8 +25,7 @@ namespace FilesManager.API.Controllers
             return Ok(result);
         }
 
-        [HttpGet]
-        [Route("{id}")]
+        [HttpGet("{id}")]
         public async Task<ActionResult<FileMetadata>> Get(Guid id)
         {
             var result = await _fileMetadataService.Get(id);
@@ -36,7 +34,6 @@ namespace FilesManager.API.Controllers
         }
 
         [HttpPost]
-        [Route("")]
         public async Task<ActionResult<FileMetadata>> Create([FromBody] FileMetadata fileMetadata)
         {
             var result = await _fileMetadataService.Create(fileMetadata);
@@ -44,8 +41,7 @@ namespace FilesManager.API.Controllers
             return Ok(result);
         }
 
-        [HttpPost]
-        [Route("/collection")]
+        [HttpPost("collection")]
         public async Task<ActionResult<IEnumerable<FileMetadata>>> CreateCollection([FromBody] IEnumerable<FileMetadata> filesMetadata)
         {
             var result = await _fileMetadataService.CreateCollection(filesMetadata);
@@ -54,7 +50,6 @@ namespace FilesManager.API.Controllers
         }
 
         [HttpPut]
-        [Route("")]
         public async Task<ActionResult> Update([FromBody] FileMetadata fileMetadata)
         {
             var result = await _fileMetadataService.Update(fileMetadata);
@@ -62,8 +57,7 @@ namespace FilesManager.API.Controllers
             return Ok(result);
         }
 
-        [HttpPut]
-        [Route("/collection")]
+        [HttpPut("collection")]
         public async Task<ActionResult> UpdateCollection([FromBody] IEnumerable<FileMetadata> filesMetadata)
         {
             var result = await _fileMetadataService.UpdateCollection(filesMetadata);
@@ -71,20 +65,18 @@ namespace FilesManager.API.Controllers
             return Ok(result);
         }
 
-        [HttpDelete]
-        [Route("{id}")]
+        [HttpDelete("{id}")]
         public async Task<ActionResult> Delete(Guid id)
         {
-            var result = await _fileMetadataService.Remove(id);
+            await _fileMetadataService.Remove(id);
 
             return Ok();
         }
 
-        [HttpDelete]
-        [Route("/collection")]
+        [HttpDelete("collection")]
         public async Task<ActionResult> DeleteCollection([FromBody] IEnumerable<Guid> ids)
         {
-            var result = await _fileMetadataService.RemoveCollection(ids);
+            await _fileMetadataService.RemoveCollection(ids);
 
             return Ok();
         }

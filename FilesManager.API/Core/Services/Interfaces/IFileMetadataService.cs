@@ -13,7 +13,7 @@ namespace FilesManager.API.Core.Services.Interfaces
         Task<IEnumerable<FileMetadata>> CreateCollection(IEnumerable<FileMetadata> filesMetadata);
         Task<FileMetadata> Update(FileMetadata fileMetadata);
         Task<IEnumerable<FileMetadata>> UpdateCollection(IEnumerable<FileMetadata> filesMetadata);
-        Task<bool> Remove(Guid id);
-        Task<bool> RemoveCollection(IEnumerable<Guid> ids);
+        Task Remove(Guid id);
+        Task RemoveCollection(IEnumerable<Guid> ids);
     }
 }
