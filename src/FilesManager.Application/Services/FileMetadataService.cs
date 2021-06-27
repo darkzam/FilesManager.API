@@ -1,12 +1,11 @@
-﻿using FilesManager.API.Core.Services.Interfaces;
-using FilesManager.DA.Models;
-using FilesManager.DA.Repositories.Interfaces;
+﻿using FilesManager.Application.Common.Interfaces;
+using FilesManager.Domain.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace FilesManager.API.Core.Services
+namespace FilesManager.Application.Services
 {
     public class FileMetadataService : IFileMetadataService
     {

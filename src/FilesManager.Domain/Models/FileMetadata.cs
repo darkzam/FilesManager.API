@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
-namespace FilesManager.DA.Models
+namespace FilesManager.Domain.Models
 {
     public class FileMetadata
     {

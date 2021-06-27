@@ -1,9 +1,9 @@
-﻿using FilesManager.DA.Models;
+﻿using FilesManager.Domain.Models;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace FilesManager.DA.Repositories.Interfaces
+namespace FilesManager.Application.Common.Interfaces
 {
     public interface IFileMetadataRepository
     {

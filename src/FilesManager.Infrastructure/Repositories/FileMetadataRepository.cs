@@ -1,13 +1,13 @@
-﻿using FilesManager.DA.Contexts;
-using FilesManager.DA.Models;
-using FilesManager.DA.Repositories.Interfaces;
+﻿using FilesManager.Application.Common.Interfaces;
+using FilesManager.Domain.Models;
+using FilesManager.Infrastructure.Contexts;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace FilesManager.DA
+namespace FilesManager.Infrastructure.Repositories
 {
     public class FileMetadataRepository : IFileMetadataRepository
     {

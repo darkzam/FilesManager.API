@@ -1,5 +1,5 @@
-﻿using FilesManager.API.Core.Services.Interfaces;
-using FilesManager.DA.Models;
+﻿using FilesManager.Application.Common.Interfaces;
+using FilesManager.Domain.Models;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;

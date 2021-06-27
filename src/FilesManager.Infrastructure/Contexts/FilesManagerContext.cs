@@ -1,11 +1,7 @@
-﻿using FilesManager.DA.Models;
+﻿using FilesManager.Domain.Models;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Infrastructure;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
-namespace FilesManager.DA.Contexts
+namespace FilesManager.Infrastructure.Contexts
 {
     public class FilesManagerContext : DbContext
     {
