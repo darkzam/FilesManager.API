@@ -1,8 +1,7 @@
-using FilesManager.API.Core.Services;
-using FilesManager.API.Core.Services.Interfaces;
-using FilesManager.DA.Contexts;
-using FilesManager.DA.Repositories;
-using FilesManager.DA.Repositories.Interfaces;
+using FilesManager.Application.Common.Interfaces;
+using FilesManager.Application.Services;
+using FilesManager.Infrastructure.Contexts;
+using FilesManager.Infrastructure.Repositories;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -23,15 +22,20 @@ namespace FilesManager.API
 
         public void ConfigureServices(IServiceCollection services)
         {
-
+            //infrastructure
             services.AddDbContext<FilesManagerContext>(options =>
             {
                 options.UseSqlServer(Configuration.GetConnectionString("FilesManagerDb"));
             });
 
-            services.AddControllers();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
+            ///////////////
+
+            //Application
             services.AddScoped<IFileMetadataService, FileMetadataService>();
+            //////////////
+
+            services.AddControllers();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

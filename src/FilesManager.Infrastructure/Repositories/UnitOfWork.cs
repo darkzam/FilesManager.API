@@ -1,9 +1,9 @@
-﻿using FilesManager.DA.Contexts;
-using FilesManager.DA.Repositories.Interfaces;
+﻿using FilesManager.Application.Common.Interfaces;
+using FilesManager.Infrastructure.Contexts;
 using System;
 using System.Threading.Tasks;
 
-namespace FilesManager.DA.Repositories
+namespace FilesManager.Infrastructure.Repositories
 {
     public class UnitOfWork : IUnitOfWork
     {
