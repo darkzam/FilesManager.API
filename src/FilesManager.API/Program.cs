@@ -20,6 +20,14 @@ namespace FilesManager.API
             Host.CreateDefaultBuilder(args)
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
+                    webBuilder.ConfigureAppConfiguration((hostingContext, config) =>
+                    {
+                        config
+                       .AddJsonFile("appsettings.json")
+                       .AddJsonFile($"appsettings.{hostingContext.HostingEnvironment.EnvironmentName}.json", optional: true);
+
+                    });
+
                     webBuilder.UseStartup<Startup>();
                 });
     }
