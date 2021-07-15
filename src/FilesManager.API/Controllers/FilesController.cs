@@ -1,8 +1,12 @@
 ﻿using FilesManager.Application.Common.Interfaces;
 using FilesManager.Domain.Models;
+using Google.Apis.Auth.OAuth2;
+using Google.Apis.Drive.v3;
+using Google.Apis.Services;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading.Tasks;
 
 namespace FilesManager.API.Controllers
@@ -79,6 +83,57 @@ namespace FilesManager.API.Controllers
             await _fileMetadataService.RemoveCollection(ids);
 
             return Ok();
+        }
+
+        //[Authorize]
+        [HttpGet("test")]
+        public ActionResult GoogleDriveApi()
+        {
+            string[] Scopes = { DriveService.Scope.DriveReadonly };
+
+            GoogleCredential credential = null;
+
+            using (var stream =
+               new FileStream("apikey.json", FileMode.Open, FileAccess.Read))
+            {
+                credential = GoogleCredential.FromStream(stream).CreateScoped(Scopes);
+            }
+
+            var service = new DriveService(new BaseClientService.Initializer()
+            {
+                HttpClientInitializer = credential,
+                ApplicationName = "FilesManager"
+            });
+
+            // Define parameters of request.
+            FilesResource.ListRequest listRequest = service.Files.List();
+            listRequest.PageSize = 30;
+            listRequest.Fields = "nextPageToken, files(id, name, mimeType)";
+            listRequest.SupportsAllDrives = true;
+            listRequest.IncludeItemsFromAllDrives = true;
+            listRequest.Q = "mimeType='image/jpeg'";
+
+            // DrivesResource.ListRequest drivesRequest = service.Drives.List();
+
+            //  IList<Google.Apis.Drive.v3.Data.File> drives = listRequest.Execute().Files;
+
+            IList<Google.Apis.Drive.v3.Data.File> files = listRequest.Execute().Files;
+
+            FilesResource.GetRequest getRequest = service.Files.Get(files[5].Id);
+
+            var file = new MemoryStream();
+
+            getRequest.DownloadWithStatus(file);
+
+            var fileName = files[5].Name;
+            var mimeType = "image/jpeg";
+
+            file.Position = 0;
+
+            return new FileStreamResult(file, mimeType)
+            {
+                FileDownloadName = fileName
+            };
         }
     }
 }
