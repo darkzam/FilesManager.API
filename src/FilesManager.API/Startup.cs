@@ -51,6 +51,7 @@ namespace FilesManager.API
 
             //application
             services.AddScoped<IFileMetadataService, FileMetadataService>();
+            services.AddTransient<IGoogleService, GoogleService>();
 
             services.AddControllers();
         }
