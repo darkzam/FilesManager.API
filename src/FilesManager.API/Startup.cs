@@ -2,6 +2,9 @@ using FilesManager.Application.Common.Interfaces;
 using FilesManager.Application.Services;
 using FilesManager.Infrastructure.Contexts;
 using FilesManager.Infrastructure.Repositories;
+using Google.Apis.Auth.AspNetCore3;
+using Google.Apis.Auth.OAuth2;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -22,6 +25,22 @@ namespace FilesManager.API
 
         public void ConfigureServices(IServiceCollection services)
         {
+            var clientSecrets = GoogleClientSecrets.FromFile("credentials.json").Secrets;
+
+            services
+                .AddAuthentication(o =>
+                {
+                    o.DefaultChallengeScheme = GoogleOpenIdConnectDefaults.AuthenticationScheme;
+                    o.DefaultForbidScheme = GoogleOpenIdConnectDefaults.AuthenticationScheme;
+                    o.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                })
+                .AddCookie()
+                .AddGoogleOpenIdConnect(options =>
+                {
+                    options.ClientId = clientSecrets.ClientId;
+                    options.ClientSecret = clientSecrets.ClientSecret;
+                });
+
             //infrastructure
             services.AddDbContext<FilesManagerContext>(options =>
             {
@@ -29,11 +48,10 @@ namespace FilesManager.API
             });
 
             services.AddScoped<IUnitOfWork, UnitOfWork>();
-            ///////////////
 
-            //Application
+            //application
             services.AddScoped<IFileMetadataService, FileMetadataService>();
-            //////////////
+            services.AddTransient<IGoogleService, GoogleService>();
 
             services.AddControllers();
         }
@@ -45,7 +63,12 @@ namespace FilesManager.API
                 app.UseDeveloperExceptionPage();
             }
 
+            app.UseHttpsRedirection();
+
             app.UseRouting();
+
+            //app.UseAuthentication();
+            //app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
             {

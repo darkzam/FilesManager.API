@@ -3,6 +3,7 @@ using FilesManager.Domain.Models;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace FilesManager.API.Controllers
@@ -12,9 +13,12 @@ namespace FilesManager.API.Controllers
     public class FilesController : ControllerBase
     {
         private readonly IFileMetadataService _fileMetadataService;
-        public FilesController(IFileMetadataService fileMetadataService)
+        private readonly IGoogleService _googleService;
+        public FilesController(IFileMetadataService fileMetadataService,
+                               IGoogleService googleService)
         {
             _fileMetadataService = fileMetadataService ?? throw new ArgumentNullException(nameof(fileMetadataService));
+            _googleService = googleService ?? throw new ArgumentNullException(nameof(googleService));
         }
 
         [HttpGet]
@@ -31,6 +35,19 @@ namespace FilesManager.API.Controllers
             var result = await _fileMetadataService.Get(id);
 
             return Ok(result);
+        }
+
+        [HttpGet("{id}/download")]
+        public async Task<ActionResult<FileMetadata>> Download(Guid id)
+        {
+            var fileMetadata = await _fileMetadataService.Get(id);
+
+            var fileModel = await _googleService.Download(fileMetadata.RemoteId);
+
+            return new FileStreamResult(fileModel.Content, fileModel.MimeType)
+            {
+                FileDownloadName = fileModel.Name
+            };
         }
 
         [HttpPost]
@@ -79,6 +96,23 @@ namespace FilesManager.API.Controllers
             await _fileMetadataService.RemoveCollection(ids);
 
             return Ok();
+        }
+
+        [HttpGet("seedData")]
+        public async Task<ActionResult<IEnumerable<FileMetadata>>> SeedDBFromRemote()
+        {
+            var filesFromRepo = await _googleService.GetAllFiles();
+
+            var files = filesFromRepo.Select(x => new FileMetadata()
+            {
+                FileName = x.Name,
+                MimeType = x.MimeType,
+                RemoteId = x.Id
+            });
+
+            var result = await _fileMetadataService.CreateCollection(files);
+
+            return Ok(result);
         }
     }
 }
