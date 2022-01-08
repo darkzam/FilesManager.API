@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 
 namespace FilesManager.Infrastructure.Repositories
@@ -93,6 +94,11 @@ namespace FilesManager.Infrastructure.Repositories
         public void RemoveCollection(IEnumerable<FileMetadata> filesMetadata)
         {
             _filesManagerContext.FileMetadata.RemoveRange(filesMetadata);
+        }
+
+        public async Task<IEnumerable<FileMetadata>> SearchBy(Expression<Func<FileMetadata, bool>> predicate)
+        {
+            return await _filesManagerContext.FileMetadata.Where(predicate).ToListAsync();
         }
     }
 }

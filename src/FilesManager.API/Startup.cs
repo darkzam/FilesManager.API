@@ -50,6 +50,7 @@ namespace FilesManager.API
             services.AddScoped<IUnitOfWork, UnitOfWork>();
 
             //application
+            services.AddScoped<ITagService, TagService>();
             services.AddScoped<IFileMetadataService, FileMetadataService>();
             services.AddTransient<IGoogleService, GoogleService>();
 

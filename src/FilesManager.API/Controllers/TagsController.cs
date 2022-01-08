@@ -32,11 +32,14 @@ namespace FilesManager.API.Controllers
                 return NotFound(nameof(fileTagsDto.RemoteId));
             }
 
-            var tags = fileTagsDto.Tags.Select(x => new Tag() { Value = x });
+            var existingTags = await _tagService.SearchByValue(fileTagsDto.Tags);
 
-            var createdTags = await _tagService.CreateCollection(tags);
+            var newTags = fileTagsDto.Tags.Where(x => !existingTags.Any(y => y.Value == x))
+                                          .Select(x => new Tag() { Value = x }).ToList();
 
-            var result = await _tagService.AssignTags(file, createdTags);
+            await _tagService.CreateCollection(newTags);
+
+            var result = await _tagService.AssignTags(file, existingTags.Union(newTags));
 
             return Ok(result);
         }

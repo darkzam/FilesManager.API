@@ -11,7 +11,7 @@ namespace FilesManager.Application.Common.Interfaces
         Task<IEnumerable<FileMetadataTag>> GetAll();
         Task<FileMetadataTag> Find(Guid id);
         Task<IEnumerable<FileMetadataTag>> FindCollection(IEnumerable<Guid> ids);
-        Task<FileMetadataTag> SearchBy(Expression<Func<FileMetadata, bool>> predicate);
+        Task<IEnumerable<FileMetadataTag>> SearchBy(Expression<Func<FileMetadataTag, bool>> predicate);
         FileMetadataTag Create(FileMetadataTag tag);
         void CreateCollection(IEnumerable<FileMetadataTag> fileMetadataTags);
         void Update(FileMetadataTag tag);

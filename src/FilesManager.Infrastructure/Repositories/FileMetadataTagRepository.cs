@@ -55,9 +55,9 @@ namespace FilesManager.Infrastructure.Repositories
             _filesManagerContext.FileMetadataTags.RemoveRange(fileMetadataTags);
         }
 
-        public Task<FileMetadataTag> SearchBy(Expression<Func<FileMetadata, bool>> predicate)
+        public async Task<IEnumerable<FileMetadataTag>> SearchBy(Expression<Func<FileMetadataTag, bool>> predicate)
         {
-            throw new NotImplementedException();
+            return await _filesManagerContext.FileMetadataTags.Where(predicate).ToListAsync();
         }
 
         public void Update(FileMetadataTag tag)

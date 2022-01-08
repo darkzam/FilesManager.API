@@ -17,13 +17,16 @@ namespace FilesManager.Application.Services
 
         public async Task<IEnumerable<FileMetadataTag>> AssignTags(FileMetadata file, IEnumerable<Tag> tags)
         {
-            var assignations = tags.Select(x => new FileMetadataTag() { FileMetadata = file, Tag = x });
+            var assignations = await _unitOfWork.FileMetadataTagRepository.SearchBy(x => x.FileMetadata.Id == file.Id);
 
-            _unitOfWork.FileMetadataTagRepository.CreateCollection(assignations);
+            var newAssignations = tags.Where(x => !assignations.Any(y => y.Tag.Id == x.Id))
+                                      .Select(x => new FileMetadataTag() { FileMetadata = file, Tag = x }).ToList();
+
+            _unitOfWork.FileMetadataTagRepository.CreateCollection(newAssignations);
 
             await _unitOfWork.CompleteAsync();
 
-            var newEntries = await _unitOfWork.FileMetadataTagRepository.FindCollection(assignations.Select(x => x.Id));
+            var newEntries = await _unitOfWork.FileMetadataTagRepository.FindCollection(newAssignations.Select(x => x.Id));
 
             return newEntries;
         }
@@ -46,6 +49,11 @@ namespace FilesManager.Application.Services
             _unitOfWork.TagRepository.RemoveCollection(entities);
 
             await _unitOfWork.CompleteAsync();
+        }
+
+        public async Task<IEnumerable<Tag>> SearchByValue(IEnumerable<string> tags)
+        {
+            return await _unitOfWork.TagRepository.SearchBy(x => tags.Contains(x.Value));
         }
     }
 }

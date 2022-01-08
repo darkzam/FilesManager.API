@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 
 namespace FilesManager.Infrastructure.Repositories
@@ -62,6 +63,11 @@ namespace FilesManager.Infrastructure.Repositories
         public void UpdateCollection(IEnumerable<Tag> tags)
         {
             _filesManagerContext.Tags.UpdateRange(tags);
+        }
+
+        public async Task<IEnumerable<Tag>> SearchBy(Expression<Func<Tag, bool>> predicate)
+        {
+            return await _filesManagerContext.Tags.Where(predicate).ToListAsync();
         }
     }
 }
