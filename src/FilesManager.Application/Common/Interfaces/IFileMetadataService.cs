@@ -9,6 +9,7 @@ namespace FilesManager.Application.Common.Interfaces
     {
         Task<FileMetadata> Get(Guid Id);
         Task<IEnumerable<FileMetadata>> GetAll();
+        Task<FileMetadata> SearchByRemoteId(string remoteId);
         Task<FileMetadata> Create(FileMetadata fileMetadata);
         Task<IEnumerable<FileMetadata>> CreateCollection(IEnumerable<FileMetadata> filesMetadata);
         Task<FileMetadata> Update(FileMetadata fileMetadata);

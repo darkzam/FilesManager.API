@@ -10,5 +10,7 @@ namespace FilesManager.Infrastructure.Contexts
         }
 
         public DbSet<FileMetadata> FileMetadata { get; set; }
+        public DbSet<Tag> Tags { get; set; }
+        public DbSet<FileMetadataTag> FileMetadataTags { get; set; }
     }
 }
