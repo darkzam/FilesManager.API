@@ -68,6 +68,11 @@ namespace FilesManager.Application.Services
             await _unitOfWork.CompleteAsync();
         }
 
+        public Task<FileMetadata> SearchByRemoteId(string remoteId)
+        {
+            throw new NotImplementedException();
+        }
+
         public async Task<FileMetadata> Update(FileMetadata fileMetadata)
         {
             _unitOfWork.FileMetadataRepository.Update(fileMetadata);
