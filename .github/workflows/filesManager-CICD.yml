@@ -1,4 +1,4 @@
-name: .NET
+name: FilesManager-ValidationBuild
 
 on:
   push:
