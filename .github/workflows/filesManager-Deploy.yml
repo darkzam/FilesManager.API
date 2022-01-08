@@ -23,7 +23,7 @@ jobs:
       
     - name: dotnet build and publish
       run: |
-        dotnet build ./src/FilesManager.sln --configuration development
+        dotnet build ./src/FilesManager.sln --configuration Debug
         dotnet publish ./src/FilesManager.sln -c Release -o '${{ env.AZURE_APPSERVICE_PATH }}/myApp'
     
     - name: Deploy to App Service
