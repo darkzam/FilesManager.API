@@ -14,8 +14,8 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Restore dependencies
-      run: dotnet restore 
+      run: dotnet restore ./src/FilesManager.sln
     - name: Build
-      run: dotnet build ./FilesManager.sln --no-restore 
+      run: dotnet build ./src/FilesManager.sln --no-restore
     - name: Test
       run: dotnet test --no-build --verbosity normal
