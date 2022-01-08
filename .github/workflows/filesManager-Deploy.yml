@@ -1,0 +1,35 @@
+name: Deploy to AppService .NET
+
+on:
+  push:
+    branches: [ master ]
+
+env:
+    AZURE_APPSERVICE_NAME: FilesManager
+    AZURE_APPSERVICE_PATH: '.'
+    
+jobs:
+  build-and-deploy:
+
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    
+    - name: Login to Azure CLI
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+      
+    - name: dotnet build and publish
+      run: |
+        dotnet build --configuration development
+        dotnet publish -c Development -o '${{ env.AZURE_APPSERVICE_PATH }}/myApp'
+    
+    - name: Deploy to App Service
+      uses: azure/webapps-deploy@v2
+      with:
+        app-name: ${{ env.AZURE_APPSERVICE_NAME }}
+        package: '${{ env.AZURE_APPSERVICE_PATH }}/myApp'
+          
+   
