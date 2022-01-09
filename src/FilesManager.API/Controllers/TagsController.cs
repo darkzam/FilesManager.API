@@ -1,9 +1,11 @@
-﻿using FilesManager.API.Models;
+﻿using FilesManager.API.Helpers;
+using FilesManager.API.Models;
 using FilesManager.Application.Common.Interfaces;
 using FilesManager.Domain.Models;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -72,6 +74,48 @@ namespace FilesManager.API.Controllers
             var files = await _tagService.SearchFilesByTags(existingTags);
 
             return Ok(files.FirstOrDefault());
+        }
+
+        [HttpGet("seedTags")]
+        public async Task<ActionResult> SeedTagsFromFile()
+        {
+            var filesTags = new Dictionary<string, string>();
+
+            using (var reader = new StreamReader(@"botnorrea_media.csv"))
+            {
+                while (!reader.EndOfStream)
+                {
+                    var line = reader.ReadLine();
+                    var values = line.Split(',');
+
+                    if (!string.IsNullOrWhiteSpace(values[1]))
+                    {
+                        if (!filesTags.ContainsKey(values[0]))
+                        {
+                            filesTags[values[0]] = values[1].RemoveAccents();
+                        }
+                        else
+                        {
+                            filesTags[values[0]] += " " + values[1].RemoveAccents();
+                        }
+                    }
+                }
+            }
+
+            foreach (var key in filesTags.Keys)
+            {
+                var tags = filesTags[key].Split(" ", StringSplitOptions.RemoveEmptyEntries);
+
+                var dto = new FileMetadataTagsDto()
+                {
+                    RemoteId = key,
+                    Tags = tags
+                };
+
+                await Create(dto);
+            }
+
+            return Ok();
         }
     }
 }
