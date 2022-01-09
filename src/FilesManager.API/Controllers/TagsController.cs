@@ -22,7 +22,7 @@ namespace FilesManager.API.Controllers
             _tagService = tagService ?? throw new ArgumentNullException(nameof(tagService));
         }
 
-        [HttpPost("")]
+        [HttpPost]
         public async Task<ActionResult<IEnumerable<FileMetadataTag>>> Create(FileMetadataTagsDto fileTagsDto)
         {
             var file = await _fileMetadataService.SearchByRemoteId(fileTagsDto.RemoteId);
@@ -42,6 +42,36 @@ namespace FilesManager.API.Controllers
             var result = await _tagService.AssignTags(file, existingTags.Union(newTags));
 
             return Ok(result);
+        }
+
+        [HttpGet]
+        public async Task<ActionResult<Tag>> GetTagsByFile(FileMetadataTagsDto fileDto)
+        {
+            var file = await _fileMetadataService.SearchByRemoteId(fileDto.RemoteId);
+
+            if (file is null)
+            {
+                return NotFound(nameof(fileDto.RemoteId));
+            }
+
+            var tags = await _tagService.SearchTagsByFile(file);
+
+            return Ok(tags);
+        }
+
+        [HttpPost("search")]
+        public async Task<ActionResult<FileMetadata>> SearchFilesByTags(IEnumerable<string> tags)
+        {
+            var existingTags = await _tagService.SearchByValue(tags);
+
+            if (!existingTags.Any())
+            {
+                return NotFound(nameof(tags));
+            }
+
+            var files = await _tagService.SearchFilesByTags(existingTags);
+
+            return Ok(files.FirstOrDefault());
         }
     }
 }

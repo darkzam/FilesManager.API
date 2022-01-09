@@ -57,7 +57,10 @@ namespace FilesManager.Infrastructure.Repositories
 
         public async Task<IEnumerable<FileMetadataTag>> SearchBy(Expression<Func<FileMetadataTag, bool>> predicate)
         {
-            return await _filesManagerContext.FileMetadataTags.Where(predicate).ToListAsync();
+            return await _filesManagerContext.FileMetadataTags.Where(predicate)
+                                                              .Include(x => x.FileMetadata)
+                                                              .Include(x => x.Tag)
+                                                              .ToListAsync();
         }
 
         public void Update(FileMetadataTag tag)

@@ -42,6 +42,13 @@ namespace FilesManager.Application.Services
             return newEntries;
         }
 
+        public async Task<IEnumerable<Tag>> SearchTagsByFile(FileMetadata file)
+        {
+            var assosiations = await _unitOfWork.FileMetadataTagRepository.SearchBy(x => x.FileMetadata.Id == file.Id);
+
+            return assosiations.Select(x => x.Tag);
+        }
+
         public async Task RemoveCollection(IEnumerable<Guid> ids)
         {
             var entities = await _unitOfWork.TagRepository.FindCollection(ids);
@@ -54,6 +61,22 @@ namespace FilesManager.Application.Services
         public async Task<IEnumerable<Tag>> SearchByValue(IEnumerable<string> tags)
         {
             return await _unitOfWork.TagRepository.SearchBy(x => tags.Contains(x.Value));
+        }
+
+        public async Task<IEnumerable<FileMetadata>> SearchFilesByTags(IEnumerable<Tag> tags)
+        {
+            var assignments = await _unitOfWork.FileMetadataTagRepository.SearchBy(x => tags.Contains(x.Tag));
+
+            var grouped = assignments.GroupBy(x => x.FileMetadata)
+                                     .Select(group => new
+                                     {
+                                         File = group.Key,
+                                         Frequency = group.Count()
+                                     })
+                                    .OrderByDescending(x => x.Frequency)
+                                    .Take(3);
+
+            return grouped.Select(x => x.File);
         }
     }
 }
