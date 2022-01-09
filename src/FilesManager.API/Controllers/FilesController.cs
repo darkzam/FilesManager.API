@@ -98,6 +98,7 @@ namespace FilesManager.API.Controllers
             return Ok();
         }
 
+        [ApiExplorerSettings(IgnoreApi = true)]
         [HttpGet("seedData")]
         public async Task<ActionResult<IEnumerable<FileMetadata>>> SeedDBFromRemote()
         {
