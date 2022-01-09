@@ -76,6 +76,7 @@ namespace FilesManager.API.Controllers
             return Ok(files.FirstOrDefault());
         }
 
+        [ApiExplorerSettings(IgnoreApi = true)]
         [HttpGet("seedTags")]
         public async Task<ActionResult> SeedTagsFromFile()
         {
