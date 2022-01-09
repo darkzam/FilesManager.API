@@ -65,9 +65,18 @@ namespace FilesManager.Application.Services
 
         public async Task<IEnumerable<FileMetadata>> SearchFilesByTags(IEnumerable<Tag> tags)
         {
-            var assosiations = await _unitOfWork.FileMetadataTagRepository.SearchBy(x => tags.Contains(x.Tag));
+            var assignments = await _unitOfWork.FileMetadataTagRepository.SearchBy(x => tags.Contains(x.Tag));
 
-            return assosiations.Select(x => x.FileMetadata);
+            var grouped = assignments.GroupBy(x => x.FileMetadata)
+                                     .Select(group => new
+                                     {
+                                         File = group.Key,
+                                         Frequency = group.Count()
+                                     })
+                                    .OrderByDescending(x => x.Frequency)
+                                    .Take(3);
+
+            return grouped.Select(x => x.File);
         }
     }
 }

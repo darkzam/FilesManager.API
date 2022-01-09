@@ -59,19 +59,19 @@ namespace FilesManager.API.Controllers
             return Ok(tags);
         }
 
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<Tag>>> GetFilesByTags(FileMetadataTagsDto tagsDto)
+        [HttpPost("search")]
+        public async Task<ActionResult<FileMetadata>> SearchFilesByTags(IEnumerable<string> tags)
         {
-            var tags = await _tagService.SearchByValue(tagsDto.Tags);
+            var existingTags = await _tagService.SearchByValue(tags);
 
-            if (!tags.Any())
+            if (!existingTags.Any())
             {
-                return NotFound();
+                return NotFound(nameof(tags));
             }
 
-            var files = await _tagService.SearchFilesByTags(tags);
+            var files = await _tagService.SearchFilesByTags(existingTags);
 
-            return Ok(files);
+            return Ok(files.FirstOrDefault());
         }
     }
 }
