@@ -98,6 +98,19 @@ namespace FilesManager.API.Controllers
             return Ok();
         }
 
+        [HttpGet("random")]
+        public async Task<ActionResult<FileMetadata>> GetRandomFile()
+        {
+            var result = await _fileMetadataService.GetRandom();
+
+            if (result is null)
+            {
+                NotFound("There's not pics in the system.");
+            }
+
+            return Ok(result);
+        }
+
         [ApiExplorerSettings(IgnoreApi = true)]
         [HttpGet("seedData")]
         public async Task<ActionResult<IEnumerable<FileMetadata>>> SeedDBFromRemote()
