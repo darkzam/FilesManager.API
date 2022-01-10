@@ -42,7 +42,9 @@ namespace FilesManager.Infrastructure.Repositories
 
         public async Task<IEnumerable<FileMetadataTag>> GetAll()
         {
-            return await _filesManagerContext.FileMetadataTags.ToListAsync();
+            return await _filesManagerContext.FileMetadataTags.Include(x => x.FileMetadata)
+                                                              .Include(x => x.Tag)
+                                                              .ToListAsync();
         }
 
         public void Remove(FileMetadataTag tag)

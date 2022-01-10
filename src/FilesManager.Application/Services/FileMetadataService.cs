@@ -101,5 +101,55 @@ namespace FilesManager.Application.Services
 
             return updatedEntries;
         }
+
+        public async Task<FileMetadata> GetRandom()
+        {
+            var files = await _unitOfWork.FileMetadataRepository.GetAll();
+
+            if (!files.Any())
+            {
+                return null;
+            }
+
+            var random = new Random();
+            var prioritizeUntagged = random.Next(1, 100);
+
+            if (prioritizeUntagged > 60)
+            {
+                return GetFullRandom(files);
+            }
+
+            return await PrioritizeUntagged(files);
+        }
+
+        private FileMetadata GetFullRandom(IEnumerable<FileMetadata> files)
+        {
+            var random = new Random();
+            var row = random.Next(0, files.Count() - 1);
+
+            return files.ElementAt(row);
+        }
+
+        private async Task<FileMetadata> PrioritizeUntagged(IEnumerable<FileMetadata> files)
+        {
+            var filesTags = await _unitOfWork.FileMetadataTagRepository.GetAll();
+
+            var join = files.GroupJoin(filesTags,
+                                        x => x.Id,
+                                        y => y.FileMetadata.Id,
+                                        (x, y) => new
+                                        {
+                                            File = x,
+                                            Amount = y.Count()
+                                        })
+                             .OrderBy(x => x.Amount);
+
+            var minFrequencies = join.Where(x => x.Amount == join.First().Amount);
+
+            var random = new Random();
+            var row = random.Next(0, minFrequencies.Count() - 1);
+
+            return minFrequencies.ElementAt(row).File;
+        }
     }
 }
