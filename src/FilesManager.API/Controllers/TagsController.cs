@@ -62,7 +62,7 @@ namespace FilesManager.API.Controllers
         }
 
         [HttpPost("search")]
-        public async Task<ActionResult<FileMetadata>> SearchFilesByTags(IEnumerable<string> tags)
+        public async Task<ActionResult<FileMetadataDto>> SearchFilesByTags(IEnumerable<string> tags)
         {
             var existingTags = await _tagService.SearchByValue(tags);
 
@@ -73,7 +73,9 @@ namespace FilesManager.API.Controllers
 
             var files = await _tagService.SearchFilesByTags(existingTags);
 
-            return Ok(files.FirstOrDefault());
+            var resultDto = files.Select(x => new FileMetadataDto() { WebContentUrl = GoogleConstants.GenerateDownloadUrl(x.RemoteId) });
+
+            return Ok(resultDto.FirstOrDefault());
         }
 
         [ApiExplorerSettings(IgnoreApi = true)]
