@@ -5,16 +5,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Remove="credentials.json" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Include="credentials.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="Google.Apis" Version="1.52.0" />
     <PackageReference Include="Google.Apis.Discovery.v1" Version="1.52.0" />
     <PackageReference Include="Google.Apis.Drive.v3" Version="1.52.0.2354" />
