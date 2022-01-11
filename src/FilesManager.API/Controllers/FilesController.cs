@@ -1,4 +1,6 @@
-﻿using FilesManager.Application.Common.Interfaces;
+﻿using FilesManager.API.Helpers;
+using FilesManager.API.Models;
+using FilesManager.Application.Common.Interfaces;
 using FilesManager.Domain.Models;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -22,19 +24,28 @@ namespace FilesManager.API.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<FileMetadata>>> GetAll()
+        public async Task<ActionResult<IEnumerable<FileMetadataDto>>> GetAll()
         {
             var result = await _fileMetadataService.GetAll();
 
-            return Ok(result);
+            var resultDto = result.Select(x => new FileMetadataDto() { WebContentUrl = GoogleConstants.GenerateDownloadUrl(x.RemoteId) });
+
+            return Ok(resultDto);
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<FileMetadata>> Get(Guid id)
+        public async Task<ActionResult<FileMetadataDto>> Get(Guid id)
         {
             var result = await _fileMetadataService.Get(id);
 
-            return Ok(result);
+            if (result is null)
+            {
+                NotFound();
+            }
+
+            var resDto = new FileMetadataDto() { WebContentUrl = GoogleConstants.GenerateDownloadUrl(result.RemoteId) };
+
+            return Ok(resDto);
         }
 
         [HttpGet("{id}/download")]
@@ -99,7 +110,7 @@ namespace FilesManager.API.Controllers
         }
 
         [HttpGet("random")]
-        public async Task<ActionResult<FileMetadata>> GetRandomFile()
+        public async Task<ActionResult<FileMetadataDto>> GetRandomFile()
         {
             var result = await _fileMetadataService.GetRandom();
 
@@ -108,7 +119,9 @@ namespace FilesManager.API.Controllers
                 NotFound("There's not pics in the system.");
             }
 
-            return Ok(result);
+            var resDto = new FileMetadataDto() { WebContentUrl = GoogleConstants.GenerateDownloadUrl(result.RemoteId) };
+
+            return Ok(resDto);
         }
 
         [ApiExplorerSettings(IgnoreApi = true)]
