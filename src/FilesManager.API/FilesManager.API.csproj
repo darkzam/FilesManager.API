@@ -32,10 +32,4 @@
     <ProjectReference Include="..\FilesManager.Infrastructure\FilesManager.Infrastructure.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Content Update="apikey.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
-
 </Project>
