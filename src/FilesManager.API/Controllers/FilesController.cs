@@ -110,13 +110,20 @@ namespace FilesManager.API.Controllers
         }
 
         [HttpGet("random")]
-        public async Task<ActionResult<FileMetadataDto>> GetRandomFile()
+        public async Task<ActionResult<FileMetadataDto>> GetRandomFile([FromQuery] string category)
         {
-            var result = await _fileMetadataService.GetRandom();
+            var foundCategory = await _fileMetadataService.FindCategory(category);
+
+            if (foundCategory is null)
+            {
+                return NotFound(nameof(category));
+            }
+
+            var result = await _fileMetadataService.GetRandom(foundCategory);
 
             if (result is null)
             {
-                NotFound("There's not pics in the system.");
+                return NotFound("There's not pics in the system.");
             }
 
             var resDto = new FileMetadataDto() { WebContentUrl = GoogleConstants.GenerateDownloadUrl(result.RemoteId) };

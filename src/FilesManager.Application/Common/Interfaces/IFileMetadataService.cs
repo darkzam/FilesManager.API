@@ -16,6 +16,7 @@ namespace FilesManager.Application.Common.Interfaces
         Task<IEnumerable<FileMetadata>> UpdateCollection(IEnumerable<FileMetadata> filesMetadata);
         Task Remove(Guid id);
         Task RemoveCollection(IEnumerable<Guid> ids);
-        Task<FileMetadata> GetRandom();
+        Task<FileMetadata> GetRandom(Category category);
+        Task<Category> FindCategory(string category);
     }
 }

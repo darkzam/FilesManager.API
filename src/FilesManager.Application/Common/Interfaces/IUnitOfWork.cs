@@ -7,6 +7,7 @@ namespace FilesManager.Application.Common.Interfaces
         IFileMetadataRepository FileMetadataRepository { get; }
         IFileMetadataTagRepository FileMetadataTagRepository { get; }
         ITagRepository TagRepository { get; }
+        ICategoryRepository CategoryRepository { get; }
         Task<int> CompleteAsync();
     }
 }

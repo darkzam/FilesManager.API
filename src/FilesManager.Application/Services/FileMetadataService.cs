@@ -102,9 +102,9 @@ namespace FilesManager.Application.Services
             return updatedEntries;
         }
 
-        public async Task<FileMetadata> GetRandom()
+        public async Task<FileMetadata> GetRandom(Category category)
         {
-            var files = await _unitOfWork.FileMetadataRepository.GetAll();
+            var files = await _unitOfWork.FileMetadataRepository.SearchBy(x => x.Category.Id == category.Id);
 
             if (!files.Any())
             {
@@ -150,6 +150,13 @@ namespace FilesManager.Application.Services
             var row = random.Next(0, minFrequencies.Count() - 1);
 
             return minFrequencies.ElementAt(row).File;
+        }
+
+        public async Task<Category> FindCategory(string categoryDescription)
+        {
+            var category = await _unitOfWork.CategoryRepository.Find(categoryDescription);
+
+            return category;
         }
     }
 }

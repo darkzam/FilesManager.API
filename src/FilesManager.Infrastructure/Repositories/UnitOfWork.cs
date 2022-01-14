@@ -16,6 +16,7 @@ namespace FilesManager.Infrastructure.Repositories
         public IFileMetadataRepository FileMetadataRepository => new FileMetadataRepository(_filesManagerContext);
         public IFileMetadataTagRepository FileMetadataTagRepository => new FileMetadataTagRepository(_filesManagerContext);
         public ITagRepository TagRepository => new TagRepository(_filesManagerContext);
+        public ICategoryRepository CategoryRepository => new CategoryRepository(_filesManagerContext);
 
         public async Task<int> CompleteAsync()
         {

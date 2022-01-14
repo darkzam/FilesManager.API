@@ -8,5 +8,6 @@ namespace FilesManager.Domain.Models
         public string FileName { get; set; }
         public string MimeType { get; set; }
         public string RemoteId { get; set; }
+        public Category Category { get; set; }
     }
 }
