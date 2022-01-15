@@ -25,8 +25,20 @@ namespace FilesManager.API.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<IEnumerable<FileMetadataTag>>> Create(FileMetadataTagsDto fileTagsDto)
+        public async Task<ActionResult<IEnumerable<FileMetadataTag>>> SetTags(FileMetadataTagsDto fileTagsDto)
         {
+            var remoteId = fileTagsDto.WebContentUrl.GetRemoteId();
+
+            if (remoteId is null && string.IsNullOrWhiteSpace(fileTagsDto.RemoteId))
+            {
+                return BadRequest(nameof(fileTagsDto.RemoteId));
+            }
+
+            if (remoteId is null)
+            {
+                remoteId = fileTagsDto.RemoteId;
+            }
+
             var file = await _fileMetadataService.SearchByRemoteId(fileTagsDto.RemoteId);
 
             if (file is null)
@@ -115,7 +127,7 @@ namespace FilesManager.API.Controllers
                     Tags = tags
                 };
 
-                await Create(dto);
+                await SetTags(dto);
             }
 
             return Ok();
