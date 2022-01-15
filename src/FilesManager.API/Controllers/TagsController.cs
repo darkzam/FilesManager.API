@@ -39,7 +39,7 @@ namespace FilesManager.API.Controllers
                 remoteId = fileTagsDto.RemoteId;
             }
 
-            var file = await _fileMetadataService.SearchByRemoteId(fileTagsDto.RemoteId);
+            var file = await _fileMetadataService.SearchByRemoteId(remoteId);
 
             if (file is null)
             {
