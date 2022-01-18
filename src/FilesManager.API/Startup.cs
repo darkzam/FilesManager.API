@@ -1,10 +1,8 @@
 using FilesManager.Application.Common.Interfaces;
+using FilesManager.Application.Models;
 using FilesManager.Application.Services;
 using FilesManager.Infrastructure.Contexts;
 using FilesManager.Infrastructure.Repositories;
-using Google.Apis.Auth.AspNetCore3;
-using Google.Apis.Auth.OAuth2;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -40,6 +38,8 @@ namespace FilesManager.API
             //        options.ClientId = clientSecrets.ClientId;
             //        options.ClientSecret = clientSecrets.ClientSecret;
             //    });
+
+            services.Configure<GoogleDriveSettings>(Configuration.GetSection("GoogleDrive"));
 
             //infrastructure
             services.AddDbContext<FilesManagerContext>(options =>

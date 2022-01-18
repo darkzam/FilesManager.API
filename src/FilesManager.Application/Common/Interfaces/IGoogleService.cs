@@ -8,7 +8,8 @@ namespace FilesManager.Application.Common.Interfaces
     public interface IGoogleService
     {
         Task<IEnumerable<File>> GetAllFiles();
+        Task Delete(string id);
         Task<FileModel> Download(string id);
-        Task Upload(File file);
+        Task<FileMetadata> Upload(FileModel file);
     }
 }

@@ -1,10 +1,11 @@
 ﻿using FilesManager.Application.Common.Interfaces;
+using FilesManager.Application.Models;
 using FilesManager.Domain.Models;
 using Google.Apis.Auth.OAuth2;
 using Google.Apis.Drive.v3;
 using Google.Apis.Drive.v3.Data;
 using Google.Apis.Services;
-using System;
+using Microsoft.Extensions.Options;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
@@ -13,19 +14,20 @@ namespace FilesManager.Application.Services
 {
     public class GoogleService : IGoogleService
     {
-        public GoogleService()
-        { }
-
-        private GoogleCredential GetCredential()
+        private readonly GoogleDriveSettings _options;
+        public GoogleService(IOptions<GoogleDriveSettings> options)
         {
-            string[] Scopes = { DriveService.Scope.DriveReadonly };
+            _options = options.Value;
+        }
 
+        private GoogleCredential GetCredential(string[] scopes)
+        {
             GoogleCredential credential = null;
 
             using (var stream =
                new FileStream("apikey.json", FileMode.Open, FileAccess.Read))
             {
-                credential = GoogleCredential.FromStream(stream).CreateScoped(Scopes);
+                credential = GoogleCredential.FromStream(stream).CreateScoped(scopes);
             }
 
             return credential;
@@ -33,7 +35,7 @@ namespace FilesManager.Application.Services
 
         public async Task<FileModel> Download(string id)
         {
-            GoogleCredential credential = GetCredential();
+            GoogleCredential credential = GetCredential(new string[] { DriveService.Scope.DriveReadonly });
 
             var service = new DriveService(new BaseClientService.Initializer()
             {
@@ -57,14 +59,9 @@ namespace FilesManager.Application.Services
             };
         }
 
-        public Task Upload(Google.Apis.Drive.v3.Data.File file)
+        public async Task Delete(string id)
         {
-            throw new NotImplementedException();
-        }
-
-        public async Task<IEnumerable<Google.Apis.Drive.v3.Data.File>> GetAllFiles()
-        {
-            GoogleCredential credential = GetCredential();
+            GoogleCredential credential = GetCredential(new string[] { DriveService.Scope.DriveFile });
 
             var service = new DriveService(new BaseClientService.Initializer()
             {
@@ -72,18 +69,82 @@ namespace FilesManager.Application.Services
                 ApplicationName = "FilesManager"
             });
 
-            // Define parameters of request.
-            FilesResource.ListRequest listRequest = service.Files.List();
-            listRequest.Spaces = "drive";
-            listRequest.PageSize = 1000;
-            listRequest.Fields = "nextPageToken, files(id, name, mimeType)";
-            listRequest.SupportsAllDrives = true;
-            listRequest.IncludeItemsFromAllDrives = true;
-            listRequest.Q = "mimeType!='application/vnd.google-apps.folder'";
+            FilesResource.DeleteRequest deleteRequest = service.Files.Delete(id);
 
-            FileList fileList = await listRequest.ExecuteAsync();
+            var result = await deleteRequest.ExecuteAsync();
+        }
 
-            return fileList.Files;
+        public async Task<FileMetadata> Upload(FileModel fileModel)
+        {
+            try
+            {
+                GoogleCredential credential = GetCredential(new string[] { DriveService.Scope.DriveFile });
+
+                var service = new DriveService(new BaseClientService.Initializer()
+                {
+                    HttpClientInitializer = credential,
+                    ApplicationName = "FilesManager"
+                });
+
+                Google.Apis.Drive.v3.Data.File fileBody = new Google.Apis.Drive.v3.Data.File();
+                fileBody.Name = fileModel.Name;
+                fileBody.MimeType = fileModel.MimeType;
+                fileBody.Parents = new List<string>() { _options.SharedFolderId };
+
+                FilesResource.CreateMediaUpload uploadRequest = service.Files.Create(fileBody,
+                                                                                     fileModel.Content,
+                                                                                     fileModel.MimeType);
+                uploadRequest.SupportsAllDrives = true;
+
+                var result = await uploadRequest.UploadAsync();
+
+                if (result.Status != Google.Apis.Upload.UploadStatus.Completed)
+                {
+                    return null;
+                }
+
+                return new FileMetadata()
+                {
+                    FileName = uploadRequest.ResponseBody.Name,
+                    MimeType = uploadRequest.ResponseBody.MimeType,
+                    RemoteId = uploadRequest.ResponseBody.Id,
+                };
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
+        public async Task<IEnumerable<Google.Apis.Drive.v3.Data.File>> GetAllFiles()
+        {
+            try
+            {
+                GoogleCredential credential = GetCredential(new string[] { DriveService.Scope.DriveReadonly });
+
+                var service = new DriveService(new BaseClientService.Initializer()
+                {
+                    HttpClientInitializer = credential,
+                    ApplicationName = "FilesManager"
+                });
+
+                // Define parameters of request.
+                FilesResource.ListRequest listRequest = service.Files.List();
+                listRequest.Spaces = "drive";
+                listRequest.PageSize = 1000;
+                listRequest.Fields = "nextPageToken, files(id, name, mimeType)";
+                listRequest.SupportsAllDrives = true;
+                listRequest.IncludeItemsFromAllDrives = true;
+                listRequest.Q = "mimeType!='application/vnd.google-apps.folder'";
+
+                FileList fileList = await listRequest.ExecuteAsync();
+
+                return fileList.Files;
+            }
+            catch
+            {
+                throw;
+            }
         }
     }
 }
