@@ -2,9 +2,11 @@
 using FilesManager.API.Models;
 using FilesManager.Application.Common.Interfaces;
 using FilesManager.Domain.Models;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -129,6 +131,69 @@ namespace FilesManager.API.Controllers
             var resDto = new FileMetadataDto() { WebContentUrl = GoogleConstants.GenerateDownloadUrl(result.RemoteId) };
 
             return Ok(resDto);
+        }
+
+        [HttpPost("upload")]
+        public async Task<ActionResult> UploadFile([FromForm] IFormFile formFile)
+        {
+            try
+            {
+                if (formFile is null)
+                {
+                    return BadRequest(nameof(formFile));
+                }
+
+                if (formFile.Length == 0)
+                {
+                    return BadRequest("FileContent is empty");
+                }
+
+                //check if valid fileType
+                var category = await _fileMetadataService.FindCategory(formFile.ContentType.GetCategory());
+
+                if (category is null)
+                {
+                    return StatusCode(StatusCodes.Status500InternalServerError, "File Category does not exist in the system.");
+                }
+
+                //search duplicate filename
+                var existingFile = await _fileMetadataService.SearchByFileName(formFile.FileName);
+
+                if (existingFile != null)
+                {
+                    return BadRequest($"The {nameof(formFile.FileName)} provided already exists in the system.");
+                }
+
+                var content = new MemoryStream();
+                await formFile.CopyToAsync(content);
+
+                var fileModel = new FileModel()
+                {
+                    Name = formFile.FileName,
+                    MimeType = formFile.ContentType,
+                    Content = content
+                };
+
+                //Upload File To GoogleDrive
+                var fileMetadata = await _googleService.Upload(fileModel);
+
+                if (fileMetadata is null)
+                {
+                    return StatusCode(StatusCodes.Status500InternalServerError, "GoogleDrive upload failed.");
+                }
+
+                fileMetadata.Category = category;
+
+                //Create File Metadata
+                var result = await _fileMetadataService.Create(fileMetadata);
+
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                //TODO: Add Serilog.
+                return StatusCode(StatusCodes.Status500InternalServerError);
+            }
         }
 
         [ApiExplorerSettings(IgnoreApi = true)]

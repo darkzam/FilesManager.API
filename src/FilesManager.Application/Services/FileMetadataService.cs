@@ -80,6 +80,18 @@ namespace FilesManager.Application.Services
             return null;
         }
 
+        public async Task<FileMetadata> SearchByFileName(string fileName)
+        {
+            var result = await _unitOfWork.FileMetadataRepository.SearchBy(x => x.FileName == fileName);
+
+            if (result.Any())
+            {
+                return result.First();
+            }
+
+            return null;
+        }
+
         public async Task<FileMetadata> Update(FileMetadata fileMetadata)
         {
             _unitOfWork.FileMetadataRepository.Update(fileMetadata);

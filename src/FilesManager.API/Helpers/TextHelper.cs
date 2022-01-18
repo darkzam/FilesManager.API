@@ -32,5 +32,11 @@ namespace FilesManager.API.Helpers
                 return null;
             }
         }
+
+        public static string GetCategory(this string mimeType)
+        {
+            var categoryName = mimeType.Split("/", StringSplitOptions.RemoveEmptyEntries);
+            return categoryName.First();
+        }
     }
 }
