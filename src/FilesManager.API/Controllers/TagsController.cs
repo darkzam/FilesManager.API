@@ -46,9 +46,11 @@ namespace FilesManager.API.Controllers
                 return NotFound(nameof(fileTagsDto.RemoteId));
             }
 
-            var existingTags = await _tagService.SearchByValue(fileTagsDto.Tags);
+            var dtoTags = fileTagsDto.Tags.Where(x => !string.IsNullOrWhiteSpace(x)).Select(x => x.Trim().ToLower());
 
-            var newTags = fileTagsDto.Tags.Where(x => !existingTags.Any(y => y.Value == x))
+            var existingTags = await _tagService.SearchByValue(dtoTags);
+
+            var newTags = dtoTags.Where(x => !existingTags.Any(y => y.Value == x))
                                           .Select(x => new Tag() { Value = x }).ToList();
 
             await _tagService.CreateCollection(newTags);
