@@ -38,5 +38,5 @@ jobs:
         files: '${{env.AZURE_APPSERVICE_PATH}}/myApp/appsettings.Development.json'
       env:
         ConnectionStrings.FilesManagerDb: '${{ secrets.CONNECTIONSTRING_DEV }}'
-        GoogleDrive.SharedFolderId: '${{ secrets.SHARED_FOLDER_ID}'
+        GoogleDrive.SharedFolderId: '${{ secrets.SHARED_FOLDER_ID}}'
         Authentication.ApiKey: '${{ secrets.API_KEY}}'
