@@ -1,4 +1,5 @@
-﻿using FilesManager.API.Helpers;
+﻿using FilesManager.API.Filters;
+using FilesManager.API.Helpers;
 using FilesManager.API.Models;
 using FilesManager.Application.Common.Interfaces;
 using FilesManager.Domain.Models;
@@ -11,6 +12,7 @@ using System.Threading.Tasks;
 
 namespace FilesManager.API.Controllers
 {
+    [ServiceFilter(typeof(AuthorizationFilter))]
     [ApiController]
     [Route("api/[Controller]")]
     public class TagsController : ControllerBase

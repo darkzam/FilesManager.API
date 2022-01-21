@@ -1,3 +1,5 @@
+using FilesManager.API.Filters;
+using FilesManager.API.Models;
 using FilesManager.Application.Common.Interfaces;
 using FilesManager.Application.Models;
 using FilesManager.Application.Services;
@@ -40,6 +42,8 @@ namespace FilesManager.API
             //    });
 
             services.Configure<GoogleDriveSettings>(Configuration.GetSection("GoogleDrive"));
+            services.Configure<AuthSettings>(Configuration.GetSection("Authentication"));
+            services.AddScoped<AuthorizationFilter>();
 
             //infrastructure
             services.AddDbContext<FilesManagerContext>(options =>
