@@ -13,4 +13,8 @@
     <ProjectReference Include="..\FilesManager.Domain\FilesManager.Domain.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Filters\" />
+  </ItemGroup>
+
 </Project>
