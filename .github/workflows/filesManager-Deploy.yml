@@ -25,13 +25,7 @@ jobs:
       run: |
         dotnet build ./src/FilesManager.sln --configuration Debug
         dotnet publish ./src/FilesManager.sln -c Release -o '${{ env.AZURE_APPSERVICE_PATH }}/myApp'
-    
-    - name: Deploy to App Service
-      uses: azure/webapps-deploy@v2
-      with:
-        app-name: ${{ env.AZURE_APPSERVICE_NAME }}
-        package: '${{ env.AZURE_APPSERVICE_PATH }}/myApp'
-    
+        
     - name: App Settings Variable Substitution
       uses: microsoft/variable-substitution@v1
       with:
@@ -40,3 +34,9 @@ jobs:
         ConnectionStrings.FilesManagerDb: '${{ secrets.CONNECTIONSTRING_DEV }}'
         GoogleDrive.SharedFolderId: '${{ secrets.SHARED_FOLDER_ID}}'
         Authentication.ApiKey: '${{ secrets.API_KEY}}'
+        
+    - name: Deploy to App Service
+      uses: azure/webapps-deploy@v2
+      with:
+        app-name: ${{ env.AZURE_APPSERVICE_NAME }}
+        package: '${{ env.AZURE_APPSERVICE_PATH }}/myApp'
