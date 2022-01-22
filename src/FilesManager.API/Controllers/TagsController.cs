@@ -3,6 +3,7 @@ using FilesManager.API.Helpers;
 using FilesManager.API.Models;
 using FilesManager.Application.Common.Interfaces;
 using FilesManager.Domain.Models;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
@@ -48,7 +49,7 @@ namespace FilesManager.API.Controllers
                 return NotFound(nameof(fileTagsDto.RemoteId));
             }
 
-            var dtoTags = fileTagsDto.Tags.Where(x => !string.IsNullOrWhiteSpace(x)).Select(x => x.Trim().ToLower());
+            var dtoTags = fileTagsDto.Tags.Where(x => !string.IsNullOrWhiteSpace(x)).Select(x => x.Trim().ToLower().RemoveAccents());
 
             var existingTags = await _tagService.SearchByValue(dtoTags);
 
@@ -78,20 +79,22 @@ namespace FilesManager.API.Controllers
         }
 
         [HttpPost("search")]
-        public async Task<ActionResult<FileMetadataDto>> SearchFilesByTags(IEnumerable<string> tags)
+        public async Task<ActionResult<FileMetadataDto>> SearchFilesByTags(IEnumerable<string> tags, [FromQuery] int limit = 5)
         {
-            var existingTags = await _tagService.SearchByValue(tags);
-
-            if (!existingTags.Any())
+            try
             {
-                return NotFound(nameof(tags));
+                var escapedTags = tags.Where(x => !string.IsNullOrWhiteSpace(x)).Select(x => x.Trim().ToLower().RemoveAccents());
+
+                var files = await _tagService.SearchFilesByTags(escapedTags, limit);
+
+                var resultDto = files.Select(x => new FileMetadataDto() { WebContentUrl = GoogleConstants.GenerateDownloadUrl(x.RemoteId) });
+
+                return Ok(resultDto);
             }
-
-            var files = await _tagService.SearchFilesByTags(existingTags);
-
-            var resultDto = files.Select(x => new FileMetadataDto() { WebContentUrl = GoogleConstants.GenerateDownloadUrl(x.RemoteId) });
-
-            return Ok(resultDto.FirstOrDefault());
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError);
+            }
         }
 
         [ApiExplorerSettings(IgnoreApi = true)]

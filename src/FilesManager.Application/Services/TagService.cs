@@ -63,20 +63,35 @@ namespace FilesManager.Application.Services
             return await _unitOfWork.TagRepository.SearchBy(x => tags.Contains(x.Value));
         }
 
-        public async Task<IEnumerable<FileMetadata>> SearchFilesByTags(IEnumerable<Tag> tags)
+        public async Task<IEnumerable<FileMetadata>> SearchFilesByTags(IEnumerable<string> tags, int limit)
         {
-            var assignments = await _unitOfWork.FileMetadataTagRepository.SearchBy(x => tags.Contains(x.Tag));
+            var assignments = await _unitOfWork.FileMetadataTagRepository.GetAll();
 
-            var grouped = assignments.GroupBy(x => x.FileMetadata)
+            var filteredAssignments = assignments.Where(x => IsTagBidirectionalSubstring(x.Tag.Value, tags));
+
+            var grouped = filteredAssignments.GroupBy(x => x.FileMetadata)
                                      .Select(group => new
                                      {
                                          File = group.Key,
                                          Frequency = group.Count()
                                      })
                                     .OrderByDescending(x => x.Frequency)
-                                    .Take(3);
+                                    .Take(limit);
 
             return grouped.Select(x => x.File);
+        }
+
+        private bool IsTagBidirectionalSubstring(string tag, IEnumerable<string> searchTags)
+        {
+            foreach (var searchTag in searchTags)
+            {
+                if (searchTag.Contains(tag) || tag.Contains(searchTag))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
     }
 }
