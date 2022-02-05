@@ -87,7 +87,12 @@ namespace FilesManager.API.Controllers
 
                 var files = await _tagService.SearchFilesByTags(escapedTags, limit);
 
-                var resultDto = files.Select(x => new FileMetadataDto() { WebContentUrl = GoogleConstants.GenerateDownloadUrl(x.RemoteId) });
+                var resultDto = files.Select(x => new FileMetadataSearchDto()
+                {
+                    WebContentUrl = GoogleConstants.GenerateDownloadUrl(x.RemoteId),
+                    Tags = x.Tags,
+                    Matches = x.Matches
+                });
 
                 return Ok(resultDto);
             }
