@@ -10,7 +10,7 @@ namespace FilesManager.Application.Common.Interfaces
     {
         Task<IEnumerable<Tag>> CreateCollection(IEnumerable<Tag> filesMetadata);
         Task RemoveCollection(IEnumerable<Guid> ids);
-        Task<IEnumerable<FileMetadataTag>> AssignTags(FileMetadata file, IEnumerable<Tag> tags);
+        Task<FileSetTagsModel> AssignTags(FileMetadata file, IEnumerable<Tag> tags);
         Task<IEnumerable<Tag>> SearchByValue(IEnumerable<string> tags);
         Task<IEnumerable<Tag>> SearchTagsByFile(FileMetadata file);
         Task<IEnumerable<FileSearchModel>> SearchFilesByTags(IEnumerable<string> tags, int limit);

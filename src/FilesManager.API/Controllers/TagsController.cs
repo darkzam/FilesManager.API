@@ -28,7 +28,7 @@ namespace FilesManager.API.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<IEnumerable<FileMetadataTag>>> SetTags(FileMetadataTagsDto fileTagsDto)
+        public async Task<ActionResult<FileMetadataSetTagsDto>> SetTags(FileMetadataTagsDto fileTagsDto)
         {
             var remoteId = fileTagsDto.WebContentUrl.GetRemoteId();
 
@@ -60,7 +60,14 @@ namespace FilesManager.API.Controllers
 
             var result = await _tagService.AssignTags(file, existingTags.Union(newTags));
 
-            return Ok(result);
+            var resultDto = new FileMetadataSetTagsDto()
+            {
+                WebContentUrl = GoogleConstants.GenerateDownloadUrl(result.RemoteId),
+                NewTags = result.NewTags,
+                Tags = result.Tags
+            };
+
+            return Ok(resultDto);
         }
 
         [HttpGet]

@@ -16,7 +16,7 @@ namespace FilesManager.Application.Services
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         }
 
-        public async Task<IEnumerable<FileMetadataTag>> AssignTags(FileMetadata file, IEnumerable<Tag> tags)
+        public async Task<FileSetTagsModel> AssignTags(FileMetadata file, IEnumerable<Tag> tags)
         {
             var assignations = await _unitOfWork.FileMetadataTagRepository.SearchBy(x => x.FileMetadata.Id == file.Id);
 
@@ -27,9 +27,12 @@ namespace FilesManager.Application.Services
 
             await _unitOfWork.CompleteAsync();
 
-            var newEntries = await _unitOfWork.FileMetadataTagRepository.FindCollection(newAssignations.Select(x => x.Id));
-
-            return newEntries;
+            return new FileSetTagsModel()
+            {
+                RemoteId = file.RemoteId,
+                Tags = assignations.Union(newAssignations).Select(x => x.Tag.Value),
+                NewTags = newAssignations.Select(x => x.Tag.Value)
+            };
         }
 
         public async Task<IEnumerable<Tag>> CreateCollection(IEnumerable<Tag> tags)
