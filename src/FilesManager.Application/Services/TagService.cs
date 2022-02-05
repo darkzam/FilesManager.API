@@ -1,4 +1,5 @@
 ﻿using FilesManager.Application.Common.Interfaces;
+using FilesManager.Application.Models;
 using FilesManager.Domain.Models;
 using System;
 using System.Collections.Generic;
@@ -15,7 +16,7 @@ namespace FilesManager.Application.Services
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         }
 
-        public async Task<IEnumerable<FileMetadataTag>> AssignTags(FileMetadata file, IEnumerable<Tag> tags)
+        public async Task<FileSetTagsModel> AssignTags(FileMetadata file, IEnumerable<Tag> tags)
         {
             var assignations = await _unitOfWork.FileMetadataTagRepository.SearchBy(x => x.FileMetadata.Id == file.Id);
 
@@ -26,9 +27,12 @@ namespace FilesManager.Application.Services
 
             await _unitOfWork.CompleteAsync();
 
-            var newEntries = await _unitOfWork.FileMetadataTagRepository.FindCollection(newAssignations.Select(x => x.Id));
-
-            return newEntries;
+            return new FileSetTagsModel()
+            {
+                RemoteId = file.RemoteId,
+                Tags = assignations.Union(newAssignations).Select(x => x.Tag.Value),
+                NewTags = newAssignations.Select(x => x.Tag.Value)
+            };
         }
 
         public async Task<IEnumerable<Tag>> CreateCollection(IEnumerable<Tag> tags)
@@ -63,7 +67,7 @@ namespace FilesManager.Application.Services
             return await _unitOfWork.TagRepository.SearchBy(x => tags.Contains(x.Value));
         }
 
-        public async Task<IEnumerable<FileMetadata>> SearchFilesByTags(IEnumerable<string> tags, int limit)
+        public async Task<IEnumerable<FileSearchModel>> SearchFilesByTags(IEnumerable<string> tags, int limit)
         {
             var assignments = await _unitOfWork.FileMetadataTagRepository.GetAll();
 
@@ -78,7 +82,17 @@ namespace FilesManager.Application.Services
                                     .OrderByDescending(x => x.Frequency)
                                     .Take(limit);
 
-            return grouped.Select(x => x.File);
+            var associatedTags = grouped.GroupJoin(assignments,
+                                                   x => x.File,
+                                                   y => y.FileMetadata,
+                                                   (x, y) => new FileSearchModel()
+                                                   {
+                                                       RemoteId = x.File.RemoteId,
+                                                       Tags = y.Select(x => x.Tag.Value),
+                                                       Matches = x.Frequency
+                                                   });
+
+            return associatedTags;
         }
 
         private bool IsTagBidirectionalSubstring(string tag, IEnumerable<string> searchTags)

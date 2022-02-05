@@ -20,11 +20,14 @@ namespace FilesManager.API.Controllers
     {
         private readonly IFileMetadataService _fileMetadataService;
         private readonly IGoogleService _googleService;
+        private readonly ITagService _tagService;
         public FilesController(IFileMetadataService fileMetadataService,
-                               IGoogleService googleService)
+                               IGoogleService googleService,
+                               ITagService tagService)
         {
             _fileMetadataService = fileMetadataService ?? throw new ArgumentNullException(nameof(fileMetadataService));
             _googleService = googleService ?? throw new ArgumentNullException(nameof(googleService));
+            _tagService = tagService ?? throw new ArgumentNullException(nameof(tagService));
         }
 
         [HttpGet]
@@ -123,14 +126,20 @@ namespace FilesManager.API.Controllers
                 return NotFound(nameof(category));
             }
 
-            var result = await _fileMetadataService.GetRandom(foundCategory);
+            var file = await _fileMetadataService.GetRandom(foundCategory);
 
-            if (result is null)
+            if (file is null)
             {
                 return NotFound("There's not pics in the system.");
             }
 
-            var resDto = new FileMetadataDto() { WebContentUrl = GoogleConstants.GenerateDownloadUrl(result.RemoteId) };
+            var tags = await _tagService.SearchTagsByFile(file);
+
+            var resDto = new FileMetadataDto()
+            {
+                WebContentUrl = GoogleConstants.GenerateDownloadUrl(file.RemoteId),
+                Tags = tags.Select(x => x.Value)
+            };
 
             return Ok(resDto);
         }
