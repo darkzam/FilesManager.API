@@ -41,6 +41,17 @@ namespace FilesManager.API
             //        options.ClientSecret = clientSecrets.ClientSecret;
             //    });
 
+            services.AddCors(options =>
+            {
+                options.AddDefaultPolicy(
+                                  builder =>
+                                  {
+                                      builder.AllowAnyOrigin()
+                                             .AllowAnyHeader()
+                                             .AllowAnyMethod();
+                                  });
+            });
+
             services.Configure<GoogleDriveSettings>(Configuration.GetSection("GoogleDrive"));
             services.Configure<AuthSettings>(Configuration.GetSection("Authentication"));
             services.AddScoped<AuthorizationFilter>();
@@ -70,15 +81,18 @@ namespace FilesManager.API
             }
 
             app.UseSwagger();
+
+            app.UseHttpsRedirection();
+
+            app.UseRouting();
+
+            app.UseCors();
+
             app.UseSwaggerUI(options =>
             {
                 options.SwaggerEndpoint("/swagger/v1/swagger.json", "v1");
                 options.RoutePrefix = string.Empty;
             });
-
-            app.UseHttpsRedirection();
-
-            app.UseRouting();
 
             //app.UseAuthentication();
             //app.UseAuthorization();
