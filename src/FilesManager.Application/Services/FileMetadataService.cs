@@ -1,4 +1,5 @@
 ﻿using FilesManager.Application.Common.Interfaces;
+using FilesManager.Application.Helpers;
 using FilesManager.Domain.Models;
 using System;
 using System.Collections.Generic;
@@ -128,18 +129,10 @@ namespace FilesManager.Application.Services
 
             if (prioritizeUntagged > 60)
             {
-                return GetFullRandom(files);
+                return files.GetRandom();
             }
 
             return await PrioritizeUntagged(files);
-        }
-
-        private FileMetadata GetFullRandom(IEnumerable<FileMetadata> files)
-        {
-            var random = new Random();
-            var row = random.Next(0, files.Count() - 1);
-
-            return files.ElementAt(row);
         }
 
         private async Task<FileMetadata> PrioritizeUntagged(IEnumerable<FileMetadata> files)
