@@ -106,7 +106,9 @@ namespace FilesManager.Application.Services
             }
             else
             {
-                selection = (grouped.Any()) ? new List<FileFrequency>() { grouped.GetRandom() } : new List<FileFrequency>();
+                var maxFrequencies = grouped.Where(x => x.Frequency == grouped.FirstOrDefault()?.Frequency);
+
+                selection = (maxFrequencies.Any()) ? new List<FileFrequency>() { maxFrequencies.GetRandom() } : new List<FileFrequency>();
             }
 
             var associatedTags = selection.GroupJoin(assignments,

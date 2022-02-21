@@ -149,12 +149,11 @@ namespace FilesManager.Application.Services
                                         })
                              .OrderBy(x => x.Amount);
 
-            var minFrequencies = join.Where(x => x.Amount == join.First().Amount);
+            var first = join.FirstOrDefault();
 
-            var random = new Random();
-            var row = random.Next(0, minFrequencies.Count() - 1);
+            var minFrequencies = join.Where(x => x.Amount == first?.Amount);
 
-            return minFrequencies.ElementAt(row).File;
+            return minFrequencies.GetRandom().File;
         }
 
         public async Task<Category> FindCategory(string categoryDescription)
