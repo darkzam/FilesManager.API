@@ -100,12 +100,41 @@ namespace FilesManager.API.Controllers
             return Ok(result);
         }
 
-        [HttpDelete("{id}")]
-        public async Task<ActionResult> Delete(Guid id)
+        [HttpDelete("{remoteId}")]
+        public async Task<ActionResult> Delete(string remoteId)
         {
-            await _fileMetadataService.Remove(id);
+            try
+            {
+                if (string.IsNullOrWhiteSpace(remoteId))
+                {
+                    return BadRequest($"{nameof(remoteId)} is null");
+                }
 
-            return Ok();
+                var file = await _fileMetadataService.SearchByRemoteId(remoteId);
+
+                if (file is null)
+                {
+                    return NotFound("File with provided remoteId was not in the system.");
+                }
+
+                var result = await _googleService.Delete(file.RemoteId);
+
+                if (!result)
+                {
+                    //refactor this into a new exception from within the method ex. throw new GoogleException().
+                    return StatusCode(StatusCodes.Status500InternalServerError, "Remote deletion failed.");
+                }
+
+                await _tagService.RemoveAssignments(file);
+
+                await _fileMetadataService.Remove(file.Id);
+
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError);
+            }
         }
 
         [HttpDelete("collection")]

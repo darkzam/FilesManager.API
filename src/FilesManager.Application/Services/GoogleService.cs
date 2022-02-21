@@ -59,19 +59,28 @@ namespace FilesManager.Application.Services
             };
         }
 
-        public async Task Delete(string id)
+        public async Task<bool> Delete(string id)
         {
-            GoogleCredential credential = GetCredential(new string[] { DriveService.Scope.DriveFile });
-
-            var service = new DriveService(new BaseClientService.Initializer()
+            try
             {
-                HttpClientInitializer = credential,
-                ApplicationName = "FilesManager"
-            });
+                GoogleCredential credential = GetCredential(new string[] { DriveService.Scope.DriveFile });
 
-            FilesResource.DeleteRequest deleteRequest = service.Files.Delete(id);
+                var service = new DriveService(new BaseClientService.Initializer()
+                {
+                    HttpClientInitializer = credential,
+                    ApplicationName = "FilesManager"
+                });
 
-            var result = await deleteRequest.ExecuteAsync();
+                FilesResource.DeleteRequest deleteRequest = service.Files.Delete(id);
+
+                var result = await deleteRequest.ExecuteAsync();
+
+                return string.IsNullOrWhiteSpace(result);
+            }
+            catch
+            {
+                throw;
+            }
         }
 
         public async Task<FileMetadata> Upload(FileModel fileModel)
