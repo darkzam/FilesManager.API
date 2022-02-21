@@ -53,9 +53,24 @@ namespace FilesManager.Application.Services
             return assosiations.Select(x => x.Tag);
         }
 
-        public async Task RemoveCollection(IEnumerable<Guid> ids)
+        public async Task RemoveAssignments(FileMetadata fileMetadata)
         {
-            var entities = await _unitOfWork.TagRepository.FindCollection(ids);
+            var assignments = await _unitOfWork.FileMetadataTagRepository.SearchBy(x => x.FileMetadata.Id == fileMetadata.Id);
+
+            _unitOfWork.FileMetadataTagRepository.RemoveCollection(assignments);
+
+            await _unitOfWork.CompleteAsync();
+        }
+
+        public async Task RemoveCollection(IEnumerable<Tag> tags)
+        {
+            var assignments = await _unitOfWork.FileMetadataTagRepository.GetAll();
+
+            var join = assignments.Join(tags, x => x.Tag.Id, y => y.Id, (x, y) => x);
+
+            _unitOfWork.FileMetadataTagRepository.RemoveCollection(join);
+
+            var entities = await _unitOfWork.TagRepository.FindCollection(tags.Select(x => x.Id));
 
             _unitOfWork.TagRepository.RemoveCollection(entities);
 

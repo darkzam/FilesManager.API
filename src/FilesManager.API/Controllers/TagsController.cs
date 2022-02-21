@@ -109,6 +109,25 @@ namespace FilesManager.API.Controllers
             }
         }
 
+        [HttpDelete("collection")]
+        public async Task<ActionResult> RemoveCollection(IEnumerable<string> tags)
+        {
+            try
+            {
+                var dtoTags = tags.Where(x => !string.IsNullOrWhiteSpace(x)).Select(x => x.Trim().ToLower().RemoveAccents());
+
+                var existingTags = await _tagService.SearchByValue(dtoTags);
+
+                await _tagService.RemoveCollection(existingTags);
+
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError);
+            }
+        }
+
         [ApiExplorerSettings(IgnoreApi = true)]
         [HttpGet("seedTags")]
         public async Task<ActionResult> SeedTagsFromFile()
