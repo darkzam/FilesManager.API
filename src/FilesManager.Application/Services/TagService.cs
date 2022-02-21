@@ -1,4 +1,5 @@
 ﻿using FilesManager.Application.Common.Interfaces;
+using FilesManager.Application.Helpers;
 using FilesManager.Application.Models;
 using FilesManager.Domain.Models;
 using System;
@@ -82,22 +83,33 @@ namespace FilesManager.Application.Services
             return await _unitOfWork.TagRepository.SearchBy(x => tags.Contains(x.Value));
         }
 
-        public async Task<IEnumerable<FileSearchModel>> SearchFilesByTags(IEnumerable<string> tags, int limit)
+        public async Task<IEnumerable<FileSearchModel>> SearchFilesByTags(IEnumerable<string> tags,
+                                                                          int? limit)
         {
             var assignments = await _unitOfWork.FileMetadataTagRepository.GetAll();
 
             var filteredAssignments = assignments.Where(x => IsTagBidirectionalSubstring(x.Tag.Value, tags));
 
             var grouped = filteredAssignments.GroupBy(x => x.FileMetadata)
-                                     .Select(group => new
+                                     .Select(group => new FileFrequency()
                                      {
                                          File = group.Key,
                                          Frequency = group.Count()
                                      })
-                                    .OrderByDescending(x => x.Frequency)
-                                    .Take(limit);
+                                    .OrderByDescending(x => x.Frequency);
 
-            var associatedTags = grouped.GroupJoin(assignments,
+            IEnumerable<FileFrequency> selection = null;
+
+            if (limit.HasValue)
+            {
+                selection = grouped.Take(limit.Value);
+            }
+            else
+            {
+                selection = (grouped.Any()) ? new List<FileFrequency>() { grouped.GetRandom() } : new List<FileFrequency>();
+            }
+
+            var associatedTags = selection.GroupJoin(assignments,
                                                    x => x.File,
                                                    y => y.FileMetadata,
                                                    (x, y) => new FileSearchModel()

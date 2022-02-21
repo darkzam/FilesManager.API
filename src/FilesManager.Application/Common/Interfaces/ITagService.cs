@@ -13,6 +13,6 @@ namespace FilesManager.Application.Common.Interfaces
         Task<FileSetTagsModel> AssignTags(FileMetadata file, IEnumerable<Tag> tags);
         Task<IEnumerable<Tag>> SearchByValue(IEnumerable<string> tags);
         Task<IEnumerable<Tag>> SearchTagsByFile(FileMetadata file);
-        Task<IEnumerable<FileSearchModel>> SearchFilesByTags(IEnumerable<string> tags, int limit);
+        Task<IEnumerable<FileSearchModel>> SearchFilesByTags(IEnumerable<string> tags, int? limit);
     }
 }

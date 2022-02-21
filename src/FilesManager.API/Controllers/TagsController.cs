@@ -86,13 +86,37 @@ namespace FilesManager.API.Controllers
         }
 
         [HttpPost("search")]
-        public async Task<ActionResult<FileMetadataDto>> SearchFilesByTags(IEnumerable<string> tags, [FromQuery] int limit = 5)
+        public async Task<ActionResult<IEnumerable<FileMetadataSearchDto>>> SearchFilesByTags(IEnumerable<string> tags, [FromQuery] int limit = 5)
         {
             try
             {
                 var escapedTags = tags.Where(x => !string.IsNullOrWhiteSpace(x)).Select(x => x.Trim().ToLower().RemoveAccents());
 
                 var files = await _tagService.SearchFilesByTags(escapedTags, limit);
+
+                var resultDto = files.Select(x => new FileMetadataSearchDto()
+                {
+                    WebContentUrl = GoogleConstants.GenerateDownloadUrl(x.RemoteId),
+                    Tags = x.Tags,
+                    Matches = x.Matches
+                });
+
+                return Ok(resultDto);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError);
+            }
+        }
+
+        [HttpPost("randomSearch")]
+        public async Task<ActionResult<IEnumerable<FileMetadataSearchDto>>> RandomSearchFilesByTags(IEnumerable<string> tags)
+        {
+            try
+            {
+                var escapedTags = tags.Where(x => !string.IsNullOrWhiteSpace(x)).Select(x => x.Trim().ToLower().RemoveAccents());
+
+                var files = await _tagService.SearchFilesByTags(escapedTags, null);
 
                 var resultDto = files.Select(x => new FileMetadataSearchDto()
                 {
