@@ -83,12 +83,12 @@ namespace FilesManager.Application.Services
             return await _unitOfWork.TagRepository.SearchBy(x => tags.Contains(x.Value));
         }
 
-        public async Task<IEnumerable<FileSearchModel>> SearchFilesByTags(IEnumerable<string> tags,
+        public async Task<IEnumerable<FileSearchModel>> SearchFilesByTags(IEnumerable<Tag> tags,
                                                                           int? limit)
         {
             var assignments = await _unitOfWork.FileMetadataTagRepository.GetAll();
 
-            var filteredAssignments = assignments.Where(x => IsTagBidirectionalSubstring(x.Tag.Value, tags));
+            var filteredAssignments = assignments.Where(x => tags.Contains(x.Tag));
 
             var grouped = filteredAssignments.GroupBy(x => x.FileMetadata)
                                      .Select(group => new FileFrequency()
@@ -124,12 +124,37 @@ namespace FilesManager.Application.Services
             return associatedTags;
         }
 
-        private bool IsTagBidirectionalSubstring(string tag, IEnumerable<string> searchTags)
+        public async Task<ParseResult> ParseTags(IEnumerable<string> tags)
+        {
+            if (!tags.Any())
+            {
+                new ParseResult()
+                {
+                    Tags = new List<Tag>(),
+                    ParseOperations = new List<ParseOperation>()
+                };
+            }
+
+            var existingTags = await _unitOfWork.TagRepository.GetAll();
+
+            var parseOperations = new List<ParseOperation>();
+
+            var parsedTags = existingTags.Where(x => IsBidirectionalSubstring(x.Value, tags, ref parseOperations));
+
+            return new ParseResult()
+            {
+                Tags = parsedTags,
+                ParseOperations = parseOperations
+            };
+        }
+
+        private bool IsBidirectionalSubstring(string tag, IEnumerable<string> searchTags, ref List<ParseOperation> parseMap)
         {
             foreach (var searchTag in searchTags)
             {
                 if (searchTag.Contains(tag) || tag.Contains(searchTag))
                 {
+                    parseMap.Add(new ParseOperation() { Input = searchTag, Ouput = tag });
                     return true;
                 }
             }

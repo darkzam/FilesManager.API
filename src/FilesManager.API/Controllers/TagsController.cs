@@ -2,6 +2,7 @@
 using FilesManager.API.Helpers;
 using FilesManager.API.Models;
 using FilesManager.Application.Common.Interfaces;
+using FilesManager.Application.Models;
 using FilesManager.Domain.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -86,13 +87,16 @@ namespace FilesManager.API.Controllers
         }
 
         [HttpPost("search")]
-        public async Task<ActionResult<IEnumerable<FileMetadataSearchDto>>> SearchFilesByTags(IEnumerable<string> tags, [FromQuery] int limit = 5)
+        public async Task<ActionResult<IEnumerable<FileMetadataSearchDto>>> SearchFilesByTags([FromBody] IEnumerable<string> tags,
+                                                                                              [FromQuery] int limit = 5)
         {
             try
             {
-                var escapedTags = tags.Where(x => !string.IsNullOrWhiteSpace(x)).Select(x => x.Trim().ToLower().RemoveAccents());
+                var escapedTags = tags.Where(x => !string.IsNullOrWhiteSpace(x)).Select(x => x.Trim().ToLower().RemoveAccents()).Distinct();
 
-                var files = await _tagService.SearchFilesByTags(escapedTags, limit);
+                var exactTags = await _tagService.SearchByValue(escapedTags);
+
+                var files = await _tagService.SearchFilesByTags(exactTags, limit);
 
                 var resultDto = files.Select(x => new FileMetadataSearchDto()
                 {
@@ -110,19 +114,40 @@ namespace FilesManager.API.Controllers
         }
 
         [HttpPost("randomSearch")]
-        public async Task<ActionResult<IEnumerable<FileMetadataSearchDto>>> RandomSearchFilesByTags(IEnumerable<string> tags)
+        public async Task<ActionResult<IEnumerable<FileMetadataSearchDto>>> RandomSearchFilesByTags([FromBody] IEnumerable<string> tags,
+                                                                                                    [FromQuery] bool parseTags)
         {
             try
             {
-                var escapedTags = tags.Where(x => !string.IsNullOrWhiteSpace(x)).Select(x => x.Trim().ToLower().RemoveAccents());
+                var escapedTags = tags.Where(x => !string.IsNullOrWhiteSpace(x))
+                                      .Distinct()
+                                      .Select(x => x.Trim()
+                                                    .ToLower()
+                                                    .RemoveAccents());
 
-                var files = await _tagService.SearchFilesByTags(escapedTags, null);
+                var exactTags = await _tagService.SearchByValue(escapedTags);
+
+                ParseResult parseResult = null;
+
+                if (parseTags)
+                {
+                    var missingTags = escapedTags.Where(x => !exactTags.Any(y => y.Value == x));
+
+                    parseResult = await _tagService.ParseTags(missingTags);
+
+                    //.ToList here added to avoid a debugger error. Research needed to find out if it can be removed.
+                    exactTags = exactTags.Union(parseResult.Tags).ToList();
+                }
+
+                var files = await _tagService.SearchFilesByTags(exactTags, null);
 
                 var resultDto = files.Select(x => new FileMetadataSearchDto()
                 {
                     WebContentUrl = GoogleConstants.GenerateDownloadUrl(x.RemoteId),
                     Tags = x.Tags,
-                    Matches = x.Matches
+                    Matches = x.Matches,
+                    ParseOperations = (parseResult is null) ? new List<ParseOperationDto>() :
+                                                             parseResult.ParseOperations.Select(x => new ParseOperationDto(x))
                 });
 
                 return Ok(resultDto);
