@@ -2,6 +2,7 @@
 using FilesManager.API.Helpers;
 using FilesManager.API.Models;
 using FilesManager.Application.Common.Interfaces;
+using FilesManager.Application.Models;
 using FilesManager.Domain.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -118,17 +119,24 @@ namespace FilesManager.API.Controllers
         {
             try
             {
-                var escapedTags = tags.Where(x => !string.IsNullOrWhiteSpace(x)).Select(x => x.Trim().ToLower().RemoveAccents()).Distinct();
+                var escapedTags = tags.Where(x => !string.IsNullOrWhiteSpace(x))
+                                      .Distinct()
+                                      .Select(x => x.Trim()
+                                                    .ToLower()
+                                                    .RemoveAccents());
 
                 var exactTags = await _tagService.SearchByValue(escapedTags);
+
+                ParseResult parseResult = null;
 
                 if (parseTags)
                 {
                     var missingTags = escapedTags.Where(x => !exactTags.Any(y => y.Value == x));
 
-                    var parsedTags = (await _tagService.ParseTags(missingTags));
+                    parseResult = await _tagService.ParseTags(missingTags);
 
-                    exactTags = exactTags.Union(parsedTags).Distinct().ToList();
+                    //.ToList here added to avoid a debugger error. Research needed to find out if it can be removed.
+                    exactTags = exactTags.Union(parseResult.Tags).ToList();
                 }
 
                 var files = await _tagService.SearchFilesByTags(exactTags, null);
@@ -137,7 +145,9 @@ namespace FilesManager.API.Controllers
                 {
                     WebContentUrl = GoogleConstants.GenerateDownloadUrl(x.RemoteId),
                     Tags = x.Tags,
-                    Matches = x.Matches
+                    Matches = x.Matches,
+                    ParseOperations = (parseResult is null) ? new List<ParseOperationDto>() :
+                                                             parseResult.ParseOperations.Select(x => new ParseOperationDto(x))
                 });
 
                 return Ok(resultDto);

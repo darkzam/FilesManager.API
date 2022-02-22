@@ -124,26 +124,37 @@ namespace FilesManager.Application.Services
             return associatedTags;
         }
 
-        public async Task<IEnumerable<Tag>> ParseTags(IEnumerable<string> tags)
+        public async Task<ParseResult> ParseTags(IEnumerable<string> tags)
         {
             if (!tags.Any())
             {
-                return new List<Tag>();
+                new ParseResult()
+                {
+                    Tags = new List<Tag>(),
+                    ParseOperations = new List<ParseOperation>()
+                };
             }
 
             var existingTags = await _unitOfWork.TagRepository.GetAll();
 
-            var parsedTags = existingTags.Where(x => IsBidirectionalSubstring(x.Value, tags));
+            var parseOperations = new List<ParseOperation>();
 
-            return parsedTags;
+            var parsedTags = existingTags.Where(x => IsBidirectionalSubstring(x.Value, tags, ref parseOperations));
+
+            return new ParseResult()
+            {
+                Tags = parsedTags,
+                ParseOperations = parseOperations
+            };
         }
 
-        private bool IsBidirectionalSubstring(string tag, IEnumerable<string> searchTags)
+        private bool IsBidirectionalSubstring(string tag, IEnumerable<string> searchTags, ref List<ParseOperation> parseMap)
         {
             foreach (var searchTag in searchTags)
             {
                 if (searchTag.Contains(tag) || tag.Contains(searchTag))
                 {
+                    parseMap.Add(new ParseOperation() { Input = searchTag, Ouput = tag });
                     return true;
                 }
             }

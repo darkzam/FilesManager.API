@@ -14,6 +14,6 @@ namespace FilesManager.Application.Common.Interfaces
         Task<IEnumerable<Tag>> SearchByValue(IEnumerable<string> tags);
         Task<IEnumerable<Tag>> SearchTagsByFile(FileMetadata file);
         Task<IEnumerable<FileSearchModel>> SearchFilesByTags(IEnumerable<Tag> tags, int? limit);
-        Task<IEnumerable<Tag>> ParseTags(IEnumerable<string> tags);
+        Task<ParseResult> ParseTags(IEnumerable<string> tags);
     }
 }
