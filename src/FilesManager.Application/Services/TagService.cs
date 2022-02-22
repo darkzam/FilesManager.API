@@ -83,12 +83,12 @@ namespace FilesManager.Application.Services
             return await _unitOfWork.TagRepository.SearchBy(x => tags.Contains(x.Value));
         }
 
-        public async Task<IEnumerable<FileSearchModel>> SearchFilesByTags(IEnumerable<string> tags,
+        public async Task<IEnumerable<FileSearchModel>> SearchFilesByTags(IEnumerable<Tag> tags,
                                                                           int? limit)
         {
             var assignments = await _unitOfWork.FileMetadataTagRepository.GetAll();
 
-            var filteredAssignments = assignments.Where(x => IsTagBidirectionalSubstring(x.Tag.Value, tags));
+            var filteredAssignments = assignments.Where(x => tags.Contains(x.Tag));
 
             var grouped = filteredAssignments.GroupBy(x => x.FileMetadata)
                                      .Select(group => new FileFrequency()
@@ -124,7 +124,21 @@ namespace FilesManager.Application.Services
             return associatedTags;
         }
 
-        private bool IsTagBidirectionalSubstring(string tag, IEnumerable<string> searchTags)
+        public async Task<IEnumerable<Tag>> ParseTags(IEnumerable<string> tags)
+        {
+            if (!tags.Any())
+            {
+                return new List<Tag>();
+            }
+
+            var existingTags = await _unitOfWork.TagRepository.GetAll();
+
+            var parsedTags = existingTags.Where(x => IsBidirectionalSubstring(x.Value, tags));
+
+            return parsedTags;
+        }
+
+        private bool IsBidirectionalSubstring(string tag, IEnumerable<string> searchTags)
         {
             foreach (var searchTag in searchTags)
             {

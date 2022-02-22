@@ -86,13 +86,16 @@ namespace FilesManager.API.Controllers
         }
 
         [HttpPost("search")]
-        public async Task<ActionResult<IEnumerable<FileMetadataSearchDto>>> SearchFilesByTags(IEnumerable<string> tags, [FromQuery] int limit = 5)
+        public async Task<ActionResult<IEnumerable<FileMetadataSearchDto>>> SearchFilesByTags([FromBody] IEnumerable<string> tags,
+                                                                                              [FromQuery] int limit = 5)
         {
             try
             {
-                var escapedTags = tags.Where(x => !string.IsNullOrWhiteSpace(x)).Select(x => x.Trim().ToLower().RemoveAccents());
+                var escapedTags = tags.Where(x => !string.IsNullOrWhiteSpace(x)).Select(x => x.Trim().ToLower().RemoveAccents()).Distinct();
 
-                var files = await _tagService.SearchFilesByTags(escapedTags, limit);
+                var exactTags = await _tagService.SearchByValue(escapedTags);
+
+                var files = await _tagService.SearchFilesByTags(exactTags, limit);
 
                 var resultDto = files.Select(x => new FileMetadataSearchDto()
                 {
@@ -110,13 +113,25 @@ namespace FilesManager.API.Controllers
         }
 
         [HttpPost("randomSearch")]
-        public async Task<ActionResult<IEnumerable<FileMetadataSearchDto>>> RandomSearchFilesByTags(IEnumerable<string> tags)
+        public async Task<ActionResult<IEnumerable<FileMetadataSearchDto>>> RandomSearchFilesByTags([FromBody] IEnumerable<string> tags,
+                                                                                                    [FromQuery] bool parseTags)
         {
             try
             {
-                var escapedTags = tags.Where(x => !string.IsNullOrWhiteSpace(x)).Select(x => x.Trim().ToLower().RemoveAccents());
+                var escapedTags = tags.Where(x => !string.IsNullOrWhiteSpace(x)).Select(x => x.Trim().ToLower().RemoveAccents()).Distinct();
 
-                var files = await _tagService.SearchFilesByTags(escapedTags, null);
+                var exactTags = await _tagService.SearchByValue(escapedTags);
+
+                if (parseTags)
+                {
+                    var missingTags = escapedTags.Where(x => !exactTags.Any(y => y.Value == x));
+
+                    var parsedTags = (await _tagService.ParseTags(missingTags));
+
+                    exactTags = exactTags.Union(parsedTags).Distinct().ToList();
+                }
+
+                var files = await _tagService.SearchFilesByTags(exactTags, null);
 
                 var resultDto = files.Select(x => new FileMetadataSearchDto()
                 {
