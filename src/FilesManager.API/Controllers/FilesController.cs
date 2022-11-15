@@ -21,13 +21,16 @@ namespace FilesManager.API.Controllers
         private readonly IFileMetadataService _fileMetadataService;
         private readonly IGoogleService _googleService;
         private readonly ITagService _tagService;
+        private readonly INotificationService _notificationService;
         public FilesController(IFileMetadataService fileMetadataService,
                                IGoogleService googleService,
-                               ITagService tagService)
+                               ITagService tagService,
+                               INotificationService notificationService)
         {
             _fileMetadataService = fileMetadataService ?? throw new ArgumentNullException(nameof(fileMetadataService));
             _googleService = googleService ?? throw new ArgumentNullException(nameof(googleService));
             _tagService = tagService ?? throw new ArgumentNullException(nameof(tagService));
+            _notificationService = notificationService ?? throw new ArgumentNullException(nameof(notificationService));
         }
 
         [HttpGet]
@@ -226,6 +229,8 @@ namespace FilesManager.API.Controllers
 
                 //Create File Metadata
                 var result = await _fileMetadataService.Create(fileMetadata);
+
+                await _notificationService.Notify(fileMetadata);
 
                 return Ok(result);
             }

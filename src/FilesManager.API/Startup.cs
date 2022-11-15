@@ -68,6 +68,7 @@ namespace FilesManager.API
             services.AddScoped<ITagService, TagService>();
             services.AddScoped<IFileMetadataService, FileMetadataService>();
             services.AddTransient<IGoogleService, GoogleService>();
+            services.AddHttpClient<INotificationService, NotificationService>();
 
             services.AddControllers();
             services.AddSwaggerGen();
