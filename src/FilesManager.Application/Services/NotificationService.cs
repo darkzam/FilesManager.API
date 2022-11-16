@@ -32,7 +32,7 @@ namespace FilesManager.Application.Services
             return null;
         }
 
-        public async Task Notify(FileMetadata fileMetadata)
+        public async Task Notify(string message)
         {
             //checks for notification channels setup
             var settings = await CheckSettingUpdates();
@@ -41,7 +41,7 @@ namespace FilesManager.Application.Services
             var calls = new List<Task>();
             foreach (var setting in settings)
             {
-                var json = Newtonsoft.Json.JsonConvert.SerializeObject(fileMetadata);
+                var json = Newtonsoft.Json.JsonConvert.SerializeObject(new { message = message });
                 var content = new StringContent(json);
                 calls.Add(_httpClient.PostAsync(setting.Value, content));
             }

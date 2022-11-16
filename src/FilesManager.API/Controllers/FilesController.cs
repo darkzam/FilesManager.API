@@ -230,7 +230,7 @@ namespace FilesManager.API.Controllers
                 //Create File Metadata
                 var result = await _fileMetadataService.Create(fileMetadata);
 
-                await _notificationService.Notify(fileMetadata);
+                await _notificationService.Notify($"New media has been uploaded to the album: {GoogleConstants.GenerateDownloadUrl(fileMetadata.RemoteId)}");
 
                 return Ok(result);
             }
