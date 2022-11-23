@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 
 namespace FilesManager.Application.Common.Interfaces
 {
-    public interface ICategoryRepository
+    public interface ICategoryRepository : IBaseRepository<Category>
     {
         Task<Category> Find(string category);
     }
